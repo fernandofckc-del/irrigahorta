@@ -1,0 +1,2976 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Irriga Horta</title>
+<meta name="description" content="Irriga Horta: programa e acompanha a rega e a hidroponia pelo Bluetooth do celular.">
+<meta name="application-name" content="Irriga">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0b5d73" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d181c" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* ---------- cores e medidas ---------- */
+:root {
+  color-scheme: light;
+  --fundo: #ecf1f3;
+  --sup: #ffffff;
+  --sup-2: #f3f7f8;
+  --sup-3: #e3ebee;
+  --borda: #cbd8dd;
+  --borda-forte: #8fa5ae;
+  --texto: #0c1a20;
+  --texto-2: #2f434c;
+  --mudo: #536670;
+  --marca: #0b5d73;
+  --marca-forte: #074658;
+  --marca-texto: #ffffff;
+  --marca-suave: #d6ebf1;
+  --marca-tinta: #0a5266;
+  --foco: #0b84a8;
+  --ok: #16703a;
+  --ok-suave: #dcf1e3;
+  --aviso: #7a4d00;
+  --aviso-suave: #fcefd0;
+  --aviso-borda: #d9a640;
+  --perigo: #a3221b;
+  --perigo-suave: #fbe2df;
+  --perigo-borda: #e39a93;
+  --grade: #e1e8eb;
+  --eixo: #5f717a;
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+  --sombra: 0 1px 2px rgba(8, 35, 45, .07), 0 2px 10px rgba(8, 35, 45, .05);
+  --raio: 14px;
+  --fonte: "IBM Plex Sans Condensed", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Roboto Mono", "DejaVu Sans Mono", monospace;
+  --nav-alt: 64px;
+  --barra-alt: 72px; /* altura da barra de mudanças (medida pelo JS) */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fundo: #0a1316;
+    --sup: #111d21;
+    --sup-2: #16252a;
+    --sup-3: #1d3037;
+    --borda: #273b42;
+    --borda-forte: #4f6871;
+    --texto: #e9f1f3;
+    --texto-2: #c0cfd4;
+    --mudo: #94a8b0;
+    --marca: #56b9d2;
+    --marca-forte: #84cfe2;
+    --marca-texto: #03161c;
+    --marca-suave: #123742;
+    --marca-tinta: #9fd9e9;
+    --foco: #8ad6ea;
+    --ok: #74d394;
+    --ok-suave: #11301d;
+    --aviso: #f1c063;
+    --aviso-suave: #32260d;
+    --aviso-borda: #8a6a25;
+    --perigo: #ff958b;
+    --perigo-suave: #3a1613;
+    --perigo-borda: #8c3a33;
+    --grade: #20323a;
+    --eixo: #8ea1a9;
+    --serie-1: #3987e5;
+    --serie-2: #d95926;
+    --sombra: 0 1px 2px rgba(0, 0, 0, .35);
+  }
+}
+
+/* ---------- base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: var(--fonte);
+  font-size: 17px;
+  line-height: 1.4;
+  padding-bottom: calc(var(--nav-alt) + 16px + env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+body.com-barra { padding-bottom: calc(var(--nav-alt) + var(--barra-alt) + 16px + env(safe-area-inset-bottom)); }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; line-height: 1.2; }
+p { margin: 0; }
+svg.ic { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.mudo { color: var(--mudo); }
+.pequeno { font-size: 15px; }
+.so-leitor { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- topo ---------- */
+.topo { position: sticky; top: 0; z-index: 30; background: var(--sup); border-bottom: 1px solid var(--borda); padding-top: env(safe-area-inset-top); }
+.topo-in { max-width: 680px; margin: 0 auto; padding: 8px 16px; min-height: 56px; display: flex; align-items: center; gap: 10px; }
+.marca { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.marca img { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+.marca-txt { min-width: 0; }
+.marca-txt strong { display: block; font-size: 19px; font-weight: 700; line-height: 1.1; }
+.marca-txt span { display: block; font-size: 14px; color: var(--mudo); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pilula { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; min-height: 36px; border-radius: 999px; background: var(--sup-2); border: 1px solid var(--borda); font-size: 15px; font-weight: 600; white-space: nowrap; }
+.ponto { width: 10px; height: 10px; border-radius: 50%; background: var(--mudo); flex: none; }
+[data-estado="conectado"] .ponto { background: var(--ok); }
+[data-estado="semsinal"] .ponto, [data-estado="reconectando"] .ponto, [data-estado="procurando"] .ponto, [data-estado="conectando"] .ponto, [data-estado="pin"] .ponto { background: var(--aviso-borda); }
+[data-estado="conectando"] .ponto, [data-estado="reconectando"] .ponto, [data-estado="procurando"] .ponto { animation: piscar 1.2s ease-in-out infinite; }
+@keyframes piscar { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- conteúdo ---------- */
+main { max-width: 680px; margin: 0 auto; padding: 14px 16px 8px; }
+.cartao { background: var(--sup); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px; margin: 0 0 12px; box-shadow: var(--sombra); }
+.cartao > h2, .cartao-titulo { font-size: 19px; font-weight: 700; }
+.cartao-cab { display: flex; align-items: flex-start; gap: 10px; justify-content: space-between; }
+.secao { font-size: 14px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--mudo); margin: 22px 4px 8px; }
+.texto-ajuda { font-size: 15px; color: var(--mudo); margin-top: 4px; }
+.vazio { text-align: center; padding: 26px 16px; }
+.vazio svg.ic { width: 40px; height: 40px; color: var(--marca); margin-bottom: 6px; }
+.vazio h2 { font-size: 20px; margin-bottom: 6px; }
+.vazio p { color: var(--texto-2); margin-bottom: 14px; }
+
+/* ---------- botões ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 6px 16px; border-radius: 10px; border: 1px solid var(--borda-forte); background: var(--sup); color: var(--texto); font-weight: 600; font-size: 17px; line-height: 1.15; text-align: center; text-decoration: none; }
+.btn svg.ic { width: 20px; height: 20px; }
+.btn:hover:not(:disabled) { background: var(--sup-2); }
+.btn-pri { background: var(--marca); border-color: var(--marca); color: var(--marca-texto); }
+.btn-pri:hover:not(:disabled) { background: var(--marca-forte); border-color: var(--marca-forte); }
+.btn-perigo { color: var(--perigo); border-color: var(--perigo-borda); }
+.btn-texto { border-color: transparent; background: transparent; color: var(--marca-tinta); padding: 6px 10px; }
+.btn-texto:hover:not(:disabled) { background: var(--marca-suave); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn-bloco { width: 100%; }
+.btn[aria-busy="true"] { opacity: .7; }
+.acoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.acoes > .btn:only-child, .acoes-1 { grid-template-columns: 1fr; }
+.acoes > .btn:only-child { grid-column: 1 / -1; }
+.acoes-linha { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.acoes-linha .btn { flex: 1 1 auto; }
+
+/* ---------- conexão ---------- */
+.cx-linha { display: flex; align-items: center; gap: 10px; }
+.cx-estado { font-size: 22px; font-weight: 700; }
+.cx-detalhe { color: var(--texto-2); margin-top: 4px; }
+.cx-info { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0 0; font-size: 16px; }
+.cx-info dt { color: var(--mudo); }
+.cx-info dd { margin: 0; font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.selo { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; padding: 2px 10px 2px 6px; border-radius: 999px; }
+.selo svg.ic { width: 18px; height: 18px; }
+.selo-ok { background: var(--ok-suave); color: var(--ok); }
+.selo-aviso { background: var(--aviso-suave); color: var(--aviso); }
+.selo-perigo { background: var(--perigo-suave); color: var(--perigo); }
+.selo-neutro { background: var(--sup-3); color: var(--texto-2); }
+
+/* ---------- avisos (alarmes, sem bluetooth) ---------- */
+.alerta { border-radius: var(--raio); padding: 14px 16px; margin: 0 0 12px; border: 1px solid; display: flex; gap: 12px; align-items: flex-start; }
+.alerta > svg.ic { margin-top: 1px; }
+.alerta h2 { font-size: 18px; margin-bottom: 4px; }
+.alerta-corpo { flex: 1; min-width: 0; }
+.alerta-perigo { background: var(--perigo-suave); border-color: var(--perigo-borda); color: var(--perigo); }
+.alerta-perigo .alerta-corpo { color: var(--texto); }
+.alerta-aviso { background: var(--aviso-suave); border-color: var(--aviso-borda); color: var(--aviso); }
+.alerta-aviso .alerta-corpo { color: var(--texto); }
+.alerta ul { margin: 0; padding: 0; list-style: none; }
+.alerta li { padding: 3px 0; }
+.alerta li .mono { color: var(--texto-2); font-size: 15px; margin-right: 6px; }
+
+/* ---------- botão da chuva ---------- */
+.chuva { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 16px; margin: 0 0 12px; border-radius: var(--raio); border: 1px solid var(--marca); background: var(--marca-suave); color: var(--marca-tinta); font-weight: 700; font-size: 18px; text-align: left; }
+.chuva svg.ic { width: 28px; height: 28px; }
+.chuva small { display: block; font-weight: 500; font-size: 15px; color: var(--texto-2); }
+.chuva:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---------- cartão de saída ---------- */
+.saida-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.saida-cab h2 { font-size: 20px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.saida-tipo { font-size: 14px; color: var(--mudo); white-space: nowrap; }
+.estado { display: flex; align-items: center; gap: 12px; margin: 10px 0 8px; padding: 10px 14px; border-radius: 12px; background: var(--sup-2); border: 1px solid var(--borda); }
+.estado svg.ic { width: 34px; height: 34px; color: var(--mudo); }
+.estado .palavra { font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -.01em; }
+.saida[data-on="1"] .estado { background: var(--marca-suave); border-color: var(--marca); }
+.saida[data-on="1"] .estado svg.ic { color: var(--marca-tinta); fill: currentColor; fill-opacity: .18; }
+.saida[data-on="x"] .estado .palavra { color: var(--mudo); font-size: 24px; }
+.saida[data-bloq="1"] .estado { background: var(--perigo-suave); border-color: var(--perigo-borda); }
+.saida[data-bloq="1"] .estado svg.ic { color: var(--perigo); }
+.linha-ic { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 17px; }
+.linha-ic svg.ic { width: 20px; height: 20px; color: var(--mudo); }
+.porque { font-weight: 600; }
+.porque[data-tipo="bloq"] { color: var(--perigo); }
+.porque[data-tipo="bloq"] svg.ic { color: var(--perigo); }
+.porque[data-tipo="semhora"] { color: var(--aviso); }
+.porque[data-tipo="semhora"] svg.ic { color: var(--aviso); }
+.detalhes { margin-top: 6px; color: var(--texto-2); font-size: 16px; }
+.acoes-saida { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.acoes-saida .btn-largo { grid-column: 1 / -1; }
+
+/* ---------- folha (diálogo) ---------- */
+dialog.folha { border: none; padding: 0; margin: auto auto 0; width: 100%; max-width: 560px; max-height: 92vh; border-radius: 18px 18px 0 0; background: var(--sup); color: var(--texto); box-shadow: 0 -6px 30px rgba(0, 0, 0, .25); }
+@media (min-width: 600px) { dialog.folha { margin: auto; border-radius: 18px; } }
+dialog.folha::backdrop { background: rgba(5, 18, 23, .55); }
+.folha-in { padding: 20px 16px calc(16px + env(safe-area-inset-bottom)); }
+.folha-in h2 { font-size: 21px; margin-bottom: 6px; }
+.folha-texto { color: var(--texto-2); margin-bottom: 14px; }
+.opcoes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.opcoes .btn { min-height: 56px; font-size: 18px; }
+.folha-outro { display: flex; gap: 8px; align-items: flex-end; margin: 8px 0 4px; }
+.folha-outro .campo { flex: 1; margin: 0; }
+.folha-botoes { display: flex; gap: 8px; margin-top: 16px; }
+.folha-botoes .btn { flex: 1; }
+.folha-erro { color: var(--perigo); font-weight: 600; margin: 8px 0 0; }
+
+/* ---------- campos ---------- */
+.campo { display: block; margin: 12px 0 0; }
+.campo > span, .campo-rot { display: block; font-size: 15px; font-weight: 600; color: var(--texto-2); margin-bottom: 4px; }
+.entrada { width: 100%; min-height: 48px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--borda-forte); background: var(--sup); color: var(--texto); font-size: 18px; }
+.entrada:focus-visible { outline-offset: 0; }
+select.entrada { appearance: none; -webkit-appearance: none; padding-right: 38px; background-image: linear-gradient(45deg, transparent 50%, var(--mudo) 50%), linear-gradient(135deg, var(--mudo) 50%, transparent 50%); background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px; background-size: 6px 6px; background-repeat: no-repeat; }
+.entrada[aria-invalid="true"] { border-color: var(--perigo); }
+.entrada-hora { font-variant-numeric: tabular-nums; padding-right: 6px; }
+.entrada-hora::-webkit-calendar-picker-indicator { margin-left: 2px; opacity: .7; }
+.entrada-unid { position: relative; }
+.entrada-unid .entrada { padding-right: 52px; }
+.entrada-unid em { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-style: normal; color: var(--mudo); font-size: 16px; pointer-events: none; }
+.dica { font-size: 15px; color: var(--mudo); margin-top: 4px; }
+.dica[data-tipo="erro"] { color: var(--perigo); font-weight: 600; }
+.dica[data-tipo="aviso"] { color: var(--aviso); font-weight: 600; }
+.grade-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.grade-2 .campo { min-width: 0; }
+
+/* interruptor */
+.interruptor { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; margin-top: 8px; }
+.interruptor input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.trilho { position: relative; width: 52px; height: 30px; border-radius: 999px; background: var(--sup-3); border: 2px solid var(--borda-forte); flex: none; transition: background .15s; }
+.trilho::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--borda-forte); transition: transform .15s, background .15s; }
+.interruptor input:checked + .trilho { background: var(--marca); border-color: var(--marca); }
+.interruptor input:checked + .trilho::after { transform: translateX(22px); background: var(--marca-texto); }
+.interruptor input:focus-visible + .trilho { outline: 3px solid var(--foco); outline-offset: 2px; }
+.interruptor input:disabled + .trilho { opacity: .5; }
+.interruptor-txt { flex: 1; min-width: 0; }
+.interruptor-txt strong { display: block; font-weight: 600; }
+.interruptor-txt small { display: block; font-size: 15px; color: var(--mudo); }
+
+/* segmentado */
+.segmentado { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 4px; padding: 4px; border-radius: 12px; background: var(--sup-3); border: 1px solid var(--borda); }
+.segmentado button { min-height: 48px; border: 0; border-radius: 9px; background: transparent; font-weight: 600; font-size: 16px; color: var(--texto-2); padding: 4px 6px; line-height: 1.1; overflow-wrap: anywhere; }
+.segmentado button[aria-pressed="true"] { background: var(--marca); color: var(--marca-texto); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+.segmentado button .sub { display: block; font-size: 12px; font-weight: 500; color: var(--mudo); }
+.segmentado button[aria-pressed="true"] .sub { color: inherit; opacity: .85; }
+
+.seg-saidas { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); margin-bottom: 12px; }
+@media (max-width: 480px) { .seg-saidas { grid-template-columns: 1fr 1fr; } }
+/* chips dos dias */
+.dias { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 12px; }
+.dias button { min-height: 44px; border-radius: 10px; border: 1px solid var(--borda-forte); background: var(--sup); font-weight: 700; font-size: 17px; color: var(--texto-2); padding: 0; }
+.dias button[aria-pressed="true"] { background: var(--marca); border-color: var(--marca); color: var(--marca-texto); }
+@media (max-width: 399px) { .regra .dias { gap: 2px; margin-left: -10px; margin-right: -10px; } }
+
+/* chips de filtro */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.chips button { min-height: 44px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--borda-forte); background: var(--sup); font-weight: 600; font-size: 16px; color: var(--texto-2); display: inline-flex; align-items: center; gap: 6px; }
+.chips button svg.ic { width: 18px; height: 18px; }
+.chips button[aria-pressed="true"] { background: var(--marca); color: var(--marca-texto); border-color: var(--marca); }
+
+/* ---------- programas ---------- */
+.linha-tempo { position: relative; height: 40px; margin-top: 16px; }
+.miolo { position: absolute; inset: 0; border-radius: 8px; background: var(--sup-3); border: 1px solid var(--borda); overflow: hidden; }
+.bloco { position: absolute; top: 0; bottom: 0; background: var(--marca); min-width: 2px; }
+.agora-marca { position: absolute; top: -7px; bottom: -3px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--texto); box-shadow: 0 0 0 2px var(--sup); }
+.agora-marca::before { content: ""; position: absolute; top: -1px; left: -4px; width: 11px; height: 6px; border-radius: 3px; background: var(--texto); }
+.regua { position: relative; height: 18px; font-size: 13px; color: var(--mudo); margin-top: 3px; }
+.regua span { position: absolute; transform: translateX(-50%); font-family: var(--mono); }
+.regua span:first-child { transform: none; }
+.regua span:last-child { transform: translateX(-100%); }
+.hoje-resumo { margin-top: 8px; color: var(--texto-2); font-size: 16px; }
+.semana { display: grid; grid-template-columns: auto 1fr auto; gap: 6px 8px; align-items: center; margin-top: 10px; }
+.semana .dia { font-weight: 600; font-size: 15px; white-space: nowrap; }
+.semana .dia.hoje { color: var(--marca-tinta); }
+.semana .barra { position: relative; height: 22px; }
+.semana .barra .miolo { border-radius: 5px; border: 0; }
+.semana .barra .agora-marca { top: -3px; bottom: -3px; }
+.semana .barra .agora-marca::before { display: none; }
+.semana .total { font-size: 14px; color: var(--mudo); text-align: right; font-family: var(--mono); white-space: nowrap; }
+.semana .regua { grid-column: 2; margin-top: 0; }
+.regra { padding: 14px 12px; }
+.regra-topo { display: flex; align-items: center; gap: 8px; }
+.regra-tipo { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 18px; flex: 1; min-width: 0; }
+.regra-tipo svg.ic { color: var(--marca-tinta); }
+.regra-topo .interruptor { margin: 0; gap: 8px; }
+.btn-icone { min-width: 48px; min-height: 48px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--mudo); }
+.btn-icone:hover { background: var(--perigo-suave); color: var(--perigo); }
+.regra-resumo { margin-top: 6px; font-size: 16px; color: var(--texto-2); }
+.regra[data-en="0"] .regra-resumo, .regra[data-en="0"] .regra-tipo { opacity: .6; }
+.lista-blocos { font-family: var(--mono); font-size: 15px; color: var(--texto-2); margin-top: 6px; }
+
+/* ---------- corrente ---------- */
+.sensor-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.sensor-cab h2 { font-size: 19px; overflow-wrap: anywhere; }
+.sensor-sub { font-size: 15px; color: var(--mudo); }
+.numero { font-size: 46px; font-weight: 700; line-height: 1; letter-spacing: -.02em; white-space: nowrap; }
+.numero small { font-size: 22px; font-weight: 600; color: var(--texto-2); margin-left: 3px; }
+.grafico { position: relative; margin-top: 12px; }
+.grafico canvas { display: block; width: 100%; height: 190px; touch-action: pan-y; cursor: crosshair; }
+.grafico canvas:focus-visible { outline-offset: 4px; border-radius: 4px; }
+.grafico .dica-graf { position: absolute; top: 2px; pointer-events: none; background: var(--sup); border: 1px solid var(--borda-forte); border-radius: 8px; padding: 4px 9px; box-shadow: var(--sombra); white-space: nowrap; font-size: 14px; color: var(--texto-2); transform: translateX(-50%); }
+.grafico .dica-graf strong { display: block; font-size: 18px; color: var(--texto); }
+.resumo-graf { font-size: 15px; color: var(--texto-2); margin-top: 6px; }
+.resumo-graf b { color: var(--texto); font-weight: 600; }
+.resumo-graf .par { white-space: nowrap; }
+.picos { margin: 10px 0 0; padding: 0; list-style: none; font-size: 15px; }
+.picos li { display: flex; gap: 8px; padding: 6px 0; border-top: 1px solid var(--grade); }
+.picos li > span:first-child { min-width: 86px; font-weight: 600; }
+.picos-v { flex: 1; min-width: 0; }
+.picos-v small { display: block; font-size: 14px; }
+.msg-erro { color: var(--perigo); font-weight: 600; margin-top: 8px; display: flex; gap: 8px; align-items: flex-start; }
+.msg-erro svg.ic { width: 20px; height: 20px; }
+
+/* ---------- histórico ---------- */
+.hist-dia { font-size: 15px; font-weight: 700; color: var(--texto-2); margin: 16px 4px 6px; text-transform: capitalize; }
+.hist-lista { list-style: none; margin: 0; padding: 0; background: var(--sup); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+.hist-lista li { display: flex; gap: 10px; align-items: flex-start; padding: 11px 14px; border-top: 1px solid var(--grade); font-size: 16px; }
+.hist-lista li:first-child { border-top: 0; }
+.hist-lista .hora { font-family: var(--mono); font-size: 15px; color: var(--mudo); min-width: 44px; padding-top: 1px; }
+.hist-lista li svg.ic { width: 20px; height: 20px; color: var(--mudo); margin-top: 1px; }
+.hist-lista li.alarme { background: var(--perigo-suave); }
+.hist-lista li.alarme svg.ic { color: var(--perigo); }
+.hist-lista li .txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- ajustes ---------- */
+.tabela { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 8px; }
+.tabela th, .tabela td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--grade); vertical-align: top; }
+.tabela th { font-weight: 600; color: var(--mudo); border-top: 0; font-size: 14px; }
+.tabela td.mono { white-space: nowrap; font-weight: 500; }
+.sub-cartao { border-top: 1px solid var(--grade); margin-top: 14px; padding-top: 6px; }
+.versao { text-align: center; color: var(--mudo); font-size: 15px; margin: 16px 0 4px; }
+
+/* ---------- barra de mudanças ---------- */
+.barra-rascunho { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-alt) + env(safe-area-inset-bottom)); z-index: 25; background: var(--aviso-suave); border-top: 1px solid var(--aviso-borda); }
+.barra-in { max-width: 680px; margin: 0 auto; padding: 8px 16px; display: flex; align-items: center; gap: 8px; }
+.barra-txt { flex: 1; min-width: 0; font-weight: 700; line-height: 1.15; display: flex; gap: 8px; align-items: center; color: var(--aviso); }
+.barra-txt small { display: block; font-weight: 500; font-size: 14px; color: var(--texto-2); }
+.barra-txt > span { color: var(--texto); }
+.barra-in .btn { padding: 6px 12px; flex: none; }
+
+/* ---------- navegação ---------- */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--sup); border-top: 1px solid var(--borda); padding-bottom: env(safe-area-inset-bottom); }
+.nav-in { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); }
+.nav button { position: relative; min-height: var(--nav-alt); border: 0; background: transparent; color: var(--mudo); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 13px; font-weight: 600; padding: 4px 0; }
+.nav button svg.ic { width: 26px; height: 26px; }
+.nav button[aria-current="page"] { color: var(--marca-tinta); }
+.nav button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 22%; right: 22%; height: 3px; border-radius: 0 0 3px 3px; background: var(--marca); }
+.nav .marcador { position: absolute; top: 8px; right: calc(50% - 20px); width: 10px; height: 10px; border-radius: 50%; background: var(--perigo); border: 2px solid var(--sup); }
+
+/* ---------- avisos rápidos ---------- */
+.toasts { position: fixed; left: 0; right: 0; bottom: calc(var(--nav-alt) + 12px + env(safe-area-inset-bottom)); z-index: 40; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; padding: 0 16px; }
+body.com-barra .toasts { bottom: calc(var(--nav-alt) + var(--barra-alt) + 8px + env(safe-area-inset-bottom)); }
+.toast { pointer-events: none; max-width: 560px; width: 100%; background: var(--texto); color: var(--sup); border-radius: 12px; padding: 12px 16px; font-weight: 600; box-shadow: 0 6px 24px rgba(0, 0, 0, .25); display: flex; gap: 10px; align-items: flex-start; }
+.toast svg.ic { width: 22px; height: 22px; }
+.toast[data-tipo="erro"] { background: var(--perigo); color: #fff; }
+@media (prefers-color-scheme: dark) { .toast[data-tipo="erro"] { color: #1a0605; } }
+
+/* ---------- versão nova ---------- */
+.versao-nova { max-width: 680px; margin: 0 auto; padding: 10px 16px 0; }
+.versao-nova .alerta { margin: 0; align-items: center; }
+
+/* ---------- telas largas ---------- */
+@media (min-width: 720px) {
+  main { padding-top: 20px; }
+}
+@media (max-width: 359px) {
+  .barra-txt small { display: none; }
+  .regua .r-meio { display: none; }
+}
+@media (max-width: 380px) {
+  .cartao { padding: 14px 12px; }
+  .estado .palavra { font-size: 28px; }
+  .numero { font-size: 42px; }
+}
+</style>
+</head>
+<body>
+<header class="topo">
+  <div class="topo-in">
+    <div class="marca">
+      <img src="icon-192.png" alt="" width="30" height="30">
+      <div class="marca-txt"><strong>Irriga Horta</strong><span id="topoNome">Rega e hidroponia</span></div>
+    </div>
+    <div class="pilula" id="topoEstado" data-estado="desligado" role="status" aria-live="polite"><span class="ponto" aria-hidden="true"></span><span id="topoEstadoTxt">Desconectado</span></div>
+  </div>
+</header>
+
+<div class="versao-nova" id="versaoNova" hidden>
+  <div class="alerta alerta-aviso" role="status">
+    <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg>
+    <div class="alerta-corpo"><strong>Versão nova do app</strong></div>
+    <button class="btn btn-pri" type="button" id="btnAtualizarApp">Atualizar</button>
+  </div>
+</div>
+
+<main id="conteudo">
+  <!-- ============ PAINEL ============ -->
+  <section id="aba-painel" class="aba" aria-labelledby="tit-painel">
+    <h1 id="tit-painel" class="so-leitor">Painel</h1>
+    <div id="avisoSemBt" class="alerta alerta-aviso" hidden>
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg>
+      <div class="alerta-corpo"><h2>Sem Bluetooth</h2><p>Este navegador não tem Bluetooth para sites. Abra no Chrome do Android.</p>
+        <p class="texto-ajuda" id="avisoSemBtVazio">Depois da primeira conexão pelo Chrome, este celular guarda os programas e o histórico para ver mesmo sem Bluetooth.</p></div>
+    </div>
+
+    <div class="cartao" id="cartaoConexao">
+      <div class="cx-linha">
+        <span class="ponto" id="cxPonto" aria-hidden="true"></span>
+        <div class="cx-estado" id="cxEstado">Desconectado</div>
+      </div>
+      <div class="cx-detalhe" id="cxDetalhe">Toque em Conectar e escolha o controlador na lista.</div>
+      <dl class="cx-info" id="cxInfo" hidden>
+        <dt>Controlador</dt><dd id="cxNome">—</dd>
+        <dt>Relógio</dt><dd id="cxRelogio">—</dd>
+        <dt>Hora</dt><dd id="cxHora">—</dd>
+        <dt>Ligado há</dt><dd id="cxUp">—</dd>
+      </dl>
+      <div class="acoes acoes-1">
+        <button class="btn btn-pri" type="button" id="btnConectar">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>Conectar</button>
+        <button class="btn" type="button" id="btnDesconectar" hidden>Desconectar</button>
+      </div>
+    </div>
+
+    <div id="alarmes"></div>
+    <button type="button" class="chuva" id="btnChuva" hidden></button>
+    <div id="cartoesSaidas"></div>
+    <div id="painelVazio" class="cartao vazio" hidden>
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>
+      <h2>Primeira vez?</h2>
+      <p>Ligue o Bluetooth do celular, chegue perto do controlador e toque em <b>Conectar</b>. Na lista, escolha o nome que começa com <b>Rega-</b>.</p>
+    </div>
+  </section>
+
+  <!-- ============ CORRENTE ============ -->
+  <section id="aba-corrente" class="aba" aria-labelledby="tit-corrente" hidden>
+    <h1 id="tit-corrente" class="so-leitor">Corrente</h1>
+    <div id="sensores"></div>
+    <div class="cartao" id="cartaoZerar">
+      <h2>Zerar sensores</h2>
+      <p class="texto-ajuda">Desligue todas as saídas. O controlador mede 1 segundo com tudo desligado e usa isso como zero.</p>
+      <div class="acoes"><button type="button" class="btn" id="btnZerar">Zerar sensores</button></div>
+      <p class="msg-erro" id="zerarErro" role="alert" hidden></p>
+    </div>
+  </section>
+
+  <!-- ============ PROGRAMAS ============ -->
+  <section id="aba-programas" class="aba" aria-labelledby="tit-programas" hidden>
+    <h1 id="tit-programas" class="so-leitor">Programas</h1>
+    <div id="progVazio"></div>
+    <div id="progCorpo">
+      <div class="segmentado seg-saidas" role="group" aria-label="Escolha a saída" id="progSaidas"></div>
+      <div id="progAvisos"></div>
+      <div class="cartao">
+        <div class="cartao-cab"><h2>Hoje</h2><span class="mudo pequeno" id="progHojeData"></span></div>
+        <div class="linha-tempo" id="progHoje" role="img"></div>
+        <div class="regua" aria-hidden="true"><span style="left:0">0h</span><span class="r-meio" style="left:25%">6h</span><span style="left:50%">12h</span><span class="r-meio" style="left:75%">18h</span><span style="left:100%">24h</span></div>
+        <p class="hoje-resumo" id="progHojeResumo"></p>
+      </div>
+      <div class="cartao">
+        <h2>Próximos 7 dias</h2>
+        <div class="semana" id="progSemana"></div>
+      </div>
+      <div class="secao" id="progRegrasTit">Regras</div>
+      <div id="progRegras"></div>
+      <div class="acoes">
+        <button type="button" class="btn" id="btnAddFixo"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Horário</button>
+        <button type="button" class="btn" id="btnAddCiclo"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ciclo</button>
+      </div>
+      <p class="dica" id="progLimite" hidden>Máximo de 8 regras por saída.</p>
+      <div class="cartao" id="progModelo" style="margin-top:12px">
+        <h2>Modelo para hidroponia</h2>
+        <p class="texto-ajuda">Dia (06:00–19:00): liga 15 min, desliga 15 min. Noite (19:00–06:00): liga 15 min, desliga 45 min.</p>
+        <div class="acoes"><button type="button" class="btn" id="btnModelo">Usar “Dia 15/15 · Noite 15/45”</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HISTÓRICO ============ -->
+  <section id="aba-historico" class="aba" aria-labelledby="tit-historico" hidden>
+    <h1 id="tit-historico" class="so-leitor">Histórico</h1>
+    <div class="chips" role="group" aria-label="Filtrar" id="histFiltros"></div>
+    <div class="acoes-linha" style="margin:0 0 4px">
+      <button type="button" class="btn" id="btnAtualizarLog">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg>Atualizar</button>
+    </div>
+    <div id="histLista"></div>
+    <div class="acoes" id="histMaisCx" hidden><button type="button" class="btn" id="btnHistMais">Mostrar mais</button></div>
+  </section>
+
+  <!-- ============ AJUSTES ============ -->
+  <section id="aba-ajustes" class="aba" aria-labelledby="tit-ajustes" hidden>
+    <h1 id="tit-ajustes" class="so-leitor">Ajustes</h1>
+    <div id="ajCorpo"></div>
+    <div class="cartao">
+      <h2>Ligações</h2>
+      <p class="texto-ajuda">Onde ligar cada fio na placa ESP32.</p>
+      <table class="tabela">
+        <thead><tr><th>O quê</th><th>Pino</th></tr></thead>
+        <tbody>
+          <tr><td>Válvula 1 — lado A (IN1 da ponte H)</td><td class="mono">GPIO 25</td></tr>
+          <tr><td>Válvula 1 — lado B (IN2 da ponte H)</td><td class="mono">GPIO 26</td></tr>
+          <tr><td>Válvula 2 — lado A (IN3 da ponte H)</td><td class="mono">GPIO 27</td></tr>
+          <tr><td>Válvula 2 — lado B (IN4 da ponte H)</td><td class="mono">GPIO 33</td></tr>
+          <tr><td>Relé 1 — saída 3 (Hidroponia)</td><td class="mono">GPIO 16</td></tr>
+          <tr><td>Relé 2 — saída 4 (luz, aerador…)</td><td class="mono">GPIO 17</td></tr>
+          <tr><td>Sensor de corrente 1 (só entrada)</td><td class="mono">GPIO 34</td></tr>
+          <tr><td>Sensor de corrente 2 (só entrada)</td><td class="mono">GPIO 35</td></tr>
+          <tr><td>Relógio DS3231 — SDA (opcional)</td><td class="mono">GPIO 21</td></tr>
+          <tr><td>Relógio DS3231 — SCL (opcional)</td><td class="mono">GPIO 22</td></tr>
+          <tr><td>LED de estado (LED azul da placa)</td><td class="mono">GPIO 2</td></tr>
+          <tr><td>Botão BOOT: segurar 3 s pausa a rega das válvulas por 24 h (ou cancela). A bomba e o relé 2 continuam no programa.</td><td class="mono">GPIO 0</td></tr>
+        </tbody>
+      </table>
+      <p class="texto-ajuda" style="margin-top:10px">ACS712 (5 V): use divisor 10 k (em cima) + 20 k (embaixo) no fio de saída. SCT-013 com saída em tensão: polarize em 1,65 V.</p>
+    </div>
+    <div class="cartao">
+      <h2>Controlador</h2>
+      <div class="acoes" style="grid-template-columns:1fr">
+        <button type="button" class="btn" id="btnReiniciar">Reiniciar controlador</button>
+        <button type="button" class="btn btn-perigo" id="btnEsquecer">Esquecer controlador</button>
+      </div>
+      <p class="texto-ajuda" style="margin-top:8px">“Esquecer” tira a permissão deste celular. Para voltar, toque em Conectar e escolha de novo.</p>
+    </div>
+    <p class="versao">Irriga Horta · app <span id="versaoApp">v1</span><span id="versaoFw"></span></p>
+  </section>
+</main>
+
+<div class="barra-rascunho" id="barraRascunho" hidden>
+  <div class="barra-in">
+    <div class="barra-txt">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg>
+      <span>Mudanças não enviadas<small id="barraSub">Toque em Enviar para gravar no controlador.</small></span>
+    </div>
+    <button type="button" class="btn btn-texto" id="btnDescartar">Descartar</button>
+    <button type="button" class="btn btn-pri" id="btnEnviar">Enviar</button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+<nav class="nav" aria-label="Telas">
+  <div class="nav-in">
+    <button type="button" data-aba="painel" aria-current="page">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="9" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="5" rx="1.5"/><rect x="13.5" y="11" width="7.5" height="10" rx="1.5"/><rect x="3" y="15" width="7.5" height="6" rx="1.5"/></svg>
+      <span>Painel</span><span class="marcador" id="navAlarme" hidden></span></button>
+    <button type="button" data-aba="corrente">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span>Corrente</span></button>
+    <button type="button" data-aba="programas">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/></svg>
+      <span>Programas</span></button>
+    <button type="button" data-aba="historico">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5M12 7.5V12l3 2"/></svg>
+      <span>Histórico</span></button>
+    <button type="button" data-aba="ajustes">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+      <span>Ajustes</span></button>
+  </div>
+</nav>
+
+<dialog class="folha" id="folha" aria-labelledby="folhaTitulo"></dialog>
+
+<noscript><p style="padding:16px">Este app precisa de JavaScript ligado.</p></noscript>
+
+<script src="agenda.js"></script>
+<script>
+'use strict';
+(function () {
+// =====================================================================
+// Constantes do protocolo (docs/PROTOCOLO.md)
+// =====================================================================
+const SERVICO = '7a3e0001-9c4b-4f8e-b3a1-2d6c5e4f1a90';
+const RX_UUID = '7a3e0002-9c4b-4f8e-b3a1-2d6c5e4f1a90';
+const TX_UUID = '7a3e0003-9c4b-4f8e-b3a1-2d6c5e4f1a90';
+const VERSAO_APP = 'v1';
+const TEMPO_RESPOSTA = 5000;   // ms para o controlador responder (e para cada escrita terminar)
+const HORA_VALIDA = 1700000000; // PROTOCOLO §3: antes disso a hora não vale
+const SEM_SINAL_MS = 3000;     // sem st por 3 s = "sem sinal"
+const MAX_EVENTOS = 2000;
+const JANELA_MS = 180000;      // gráfico: últimos 3 minutos
+const Agenda = window.Agenda;
+
+const NOMES_PADRAO = ['Válvula 1', 'Válvula 2', 'Hidroponia', 'Relé 2'];
+const DIAS_CURTOS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const DIAS_LETRA = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+const DIAS_LONGOS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const ORIGENS = { 0: 'programa', 1: 'manual', 2: 'pausa', 3: 'corrente alta', 4: 'início', 5: 'botão', 7: 'saída desativada' };
+const MODELOS = [
+  { id: 'acs5', nome: 'ACS712 5 A', mva: 185, tp: 'dc', div: 0.667 },
+  { id: 'acs20', nome: 'ACS712 20 A', mva: 100, tp: 'dc', div: 0.667 },
+  { id: 'acs30', nome: 'ACS712 30 A', mva: 66, tp: 'dc', div: 0.667 },
+  { id: 'sct30', nome: 'SCT-013-030', mva: 33.3, tp: 'ac', div: 1 },
+  { id: 'sct20', nome: 'SCT-013-020', mva: 50, tp: 'ac', div: 1 },
+  { id: 'sct10', nome: 'SCT-013-010', mva: 100, tp: 'ac', div: 1 },
+  { id: 'sct5', nome: 'SCT-013-005', mva: 200, tp: 'ac', div: 1 },
+  { id: 'pers', nome: 'Personalizado' }
+];
+const DURACOES_MIN = [5, 10, 15, 30, 60, 120];
+const PAUSAS_H = [6, 12, 24, 48, 72];
+
+// =====================================================================
+// Ícones (SVG fixos, sem dados de fora)
+// =====================================================================
+const IC = {
+  gota: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  gotaFechada: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M8.5 14h7"/>',
+  energia: '<path d="M12 3v9"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/>',
+  calendario: '<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
+  mao: '<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11m0-6.5a1.5 1.5 0 0 1 3 0V11m0-5a1.5 1.5 0 0 1 3 0v5m0-3a1.5 1.5 0 0 1 3 0v6a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-2.7l-3-4.6a1.6 1.6 0 0 1 2.6-1.8L8 14"/>',
+  pausa: '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
+  alerta: '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/>',
+  relogio: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  seta: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  chuva: '<path d="M7 15.5a4.5 4.5 0 1 1 1.2-8.8A6 6 0 0 1 19.6 9 3.5 3.5 0 0 1 18 15.5z"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/>',
+  lixo: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  ciclo: '<path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/>',
+  cadeado: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',
+  volta: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  ok: '<path d="m5 12 5 5 9-10"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  pulso: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
+  bt: '<path d="m7 7 10 10-5 5V2l5 5L7 17"/>'
+};
+function icone(nome, extra) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const s = document.createElementNS(ns, 'svg');
+  s.setAttribute('class', 'ic' + (extra ? ' ' + extra : ''));
+  s.setAttribute('viewBox', '0 0 24 24');
+  s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = IC[nome] || '';
+  return s;
+}
+
+// =====================================================================
+// Pequenas ajudas
+// =====================================================================
+const $ = (sel, raiz) => (raiz || document).querySelector(sel);
+const $$ = (sel, raiz) => Array.from((raiz || document).querySelectorAll(sel));
+let contadorId = 0;
+const novoId = (p) => (p || 'c') + (++contadorId);
+function h(tag, props) {
+  const el = document.createElement(tag);
+  if (props) {
+    for (const k in props) {
+      const v = props[k];
+      if (v === null || v === undefined || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k === 'dataset') Object.assign(el.dataset, v);
+      else if (k.slice(0, 2) === 'on' && typeof v === 'function') el.addEventListener(k.slice(2), v);
+      else if (v === true) el.setAttribute(k, '');
+      else el.setAttribute(k, String(v));
+    }
+  }
+  for (let i = 2; i < arguments.length; i++) anexar(el, arguments[i]);
+  return el;
+}
+function anexar(el, f) {
+  if (f === null || f === undefined || f === false) return;
+  if (Array.isArray(f)) { f.forEach((x) => anexar(el, x)); return; }
+  el.append(f instanceof Node ? f : String(f));
+}
+const clonar = (o) => JSON.parse(JSON.stringify(o));
+const pad = (n) => String(n).padStart(2, '0');
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+const codificador = new TextEncoder();
+const bytesUtf8 = (s) => codificador.encode(String(s)).length;
+function cortarBytes(s, max) {
+  s = String(s);
+  while (bytesUtf8(s) > max) s = Array.from(s).slice(0, -1).join('');
+  return s;
+}
+function num(x, padrao) { const n = Number(x); return isFinite(n) ? n : padrao; }
+function arred(x, casas) { const f = Math.pow(10, casas); return Math.round(num(x, 0) * f) / f; }
+
+// ---------- armazenamento (o app funciona mesmo se o localStorage falhar) ----------
+function ler(chave, padrao) {
+  try {
+    const t = localStorage.getItem('rega.' + chave);
+    return t === null ? padrao : JSON.parse(t);
+  } catch (e) { return padrao; }
+}
+function gravar(chave, valor) {
+  try {
+    if (valor === null || valor === undefined) localStorage.removeItem('rega.' + chave);
+    else localStorage.setItem('rega.' + chave, JSON.stringify(valor));
+  } catch (e) { /* sem espaço ou bloqueado: segue só em memória */ }
+}
+
+// ---------- números e datas em português ----------
+const fmt2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// espaço que não quebra: "5,20 A" nunca fica partido em duas linhas
+function fmtA(x) { return fmt2.format(num(x, 0)) + '\u00a0A'; }
+function fmtDec(x, casas) {
+  return new Intl.NumberFormat('pt-BR', { maximumFractionDigits: casas, useGrouping: false }).format(num(x, 0));
+}
+function lerDec(t) {
+  const s = String(t).trim().replace(/\s/g, '').replace(',', '.');
+  if (!/^-?\d*\.?\d+$|^-?\d+\.$/.test(s)) return NaN;
+  return Number(s);
+}
+function fmtDuracao(min) {
+  min = Math.round(min);
+  if (min < 60) return min + ' min';
+  const hh = Math.floor(min / 60), mm = min % 60;
+  return hh + ' h' + (mm ? ' ' + mm + ' min' : '');
+}
+function fmtDuracaoCurta(min) {
+  min = Math.round(min);
+  if (!min) return '—';
+  if (min < 60) return min + ' min';
+  const hh = Math.floor(min / 60), mm = min % 60;
+  return hh + 'h' + (mm ? pad(mm) : '');
+}
+function hhmm(min) { min = ((Math.round(min) % 1440) + 1440) % 1440; return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
+function lerHhmm(t) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(t || ''));
+  if (!m) return NaN;
+  const hh = Number(m[1]), mm = Number(m[2]);
+  if (hh > 23 || mm > 59) return NaN;
+  return hh * 60 + mm;
+}
+function fusoCelular() { return -new Date().getTimezoneOffset(); }
+function fmtFuso(tz) {
+  const s = tz < 0 ? '−' : '+';
+  const a = Math.abs(tz);
+  return 'UTC' + s + Math.floor(a / 60) + (a % 60 ? ':' + pad(a % 60) : '');
+}
+
+// =====================================================================
+// Estado do app
+// =====================================================================
+function cfgPadrao() {
+  return {
+    v: 1, nome: 'Rega', tz: -180, pms: 80, f2: 1, temPin: 0,
+    s: NOMES_PADRAO.map((n, i) => ({ n: n, en: i < 3 ? 1 : 0, inv: 0, r: [] })),
+    sen: [
+      { n: 'Válvulas', en: 0, tp: 'dc', mva: 185, div: 0.667, aj: 1, sa: -2, min: 0.1, max: 0, corta: 0 },
+      { n: 'Bomba', en: 0, tp: 'ac', mva: 33.3, div: 1, aj: 1, sa: 2, min: 0.1, max: 0, corta: 0 }
+    ]
+  };
+}
+function regraLimpa(r) {
+  const w = Math.round(num(r.w, 127)), en = num(r.en, 1) ? 1 : 0;
+  if (r.k === 'f') return { k: 'f', h: Math.round(num(r.h, 0)), d: Math.round(num(r.d, 1)), w: w, en: en };
+  return { k: 'c', a: Math.round(num(r.a, 0)), b: Math.round(num(r.b, 0)), on: Math.round(num(r.on, 1)), off: Math.round(num(r.off, 0)), w: w, en: en };
+}
+// Deixa a configuração com todos os campos (se vier faltando algo, usa o padrão).
+function normalizarCfg(c) {
+  if (!c || typeof c !== 'object') return null;
+  const p = cfgPadrao();
+  const n = {
+    v: 1,
+    nome: typeof c.nome === 'string' && c.nome ? c.nome : p.nome,
+    tz: num(c.tz, -180), pms: num(c.pms, 80), f2: num(c.f2, 1) ? 1 : 0, temPin: num(c.temPin, 0) ? 1 : 0,
+    s: [], sen: []
+  };
+  for (let i = 0; i < 4; i++) {
+    const s = (Array.isArray(c.s) && c.s[i]) || {};
+    n.s.push({
+      n: typeof s.n === 'string' ? s.n : p.s[i].n,
+      en: s.en === undefined ? p.s[i].en : (num(s.en, 0) ? 1 : 0),
+      inv: num(s.inv, 0) ? 1 : 0,
+      r: Array.isArray(s.r) ? s.r.filter((r) => r && (r.k === 'f' || r.k === 'c')).slice(0, 8).map(regraLimpa) : []
+    });
+  }
+  for (let j = 0; j < 2; j++) {
+    const x = (Array.isArray(c.sen) && c.sen[j]) || {};
+    const d = p.sen[j];
+    n.sen.push({
+      n: typeof x.n === 'string' ? x.n : d.n,
+      en: x.en === undefined ? d.en : (num(x.en, 0) ? 1 : 0),
+      tp: x.tp === 'ac' || x.tp === 'dc' ? x.tp : d.tp,
+      mva: num(x.mva, d.mva), div: num(x.div, d.div), aj: num(x.aj, d.aj),
+      sa: Math.round(num(x.sa, d.sa)), min: num(x.min, d.min), max: num(x.max, d.max),
+      corta: num(x.corta, 0) ? 1 : 0
+    });
+  }
+  if (typeof c.pin === 'string') n.pin = c.pin;
+  return n;
+}
+// Forma fixa para comparar rascunho × controlador (sem versão e temPin).
+function canon(c) {
+  if (!c) return '';
+  return JSON.stringify({
+    nome: c.nome, tz: num(c.tz, 0), pms: num(c.pms, 0), f2: num(c.f2, 0) ? 1 : 0, pin: typeof c.pin === 'string' ? c.pin : null,
+    s: c.s.map((s) => ({ n: s.n, en: s.en ? 1 : 0, inv: s.inv ? 1 : 0, r: s.r.map(regraLimpa) })),
+    sen: c.sen.map((x) => ({
+      n: x.n, en: x.en ? 1 : 0, tp: x.tp, mva: arred(x.mva, 3), div: arred(x.div, 4), aj: arred(x.aj, 3),
+      sa: num(x.sa, -1), min: arred(x.min, 3), max: arred(x.max, 3), corta: x.corta ? 1 : 0
+    }))
+  });
+}
+
+const E = {
+  aba: 'painel',
+  ctrl: ler('ctrl', null),            // {id, nome, fw} do último controlador
+  cfg: normalizarCfg(ler('cfg', null)),
+  rascunho: normalizarCfg(ler('rascunho', null)),
+  eventos: [],
+  alarmesVistos: lerVistos(),          // {ep, ch: [chaves]}: alarmes que o dono já viu
+  st: null, stEm: 0,
+  amostras: [],                       // {t: ms, v: [a, b]}
+  ultimaI: [null, null],
+  filtroHist: 'tudo', histLimite: 150,
+  saidaProg: num(ler('saidaProg', 0), 0)
+};
+// Alarmes vistos = todos até o segundo "ep" (e, nesse segundo, só os de "ch").
+function lerVistos() {
+  const v = ler('alarmesVistos', null);
+  if (typeof v === 'number') return { ep: v, ch: [] };
+  if (v && typeof v === 'object' && isFinite(v.ep) && Array.isArray(v.ch)) return { ep: Number(v.ep), ch: v.ch.map(String) };
+  return { ep: 0, ch: [] };
+}
+(function carregarEventos() {
+  const l = ler('eventos', []);
+  E.eventos = Array.isArray(l) ? l.filter((e) => Array.isArray(e) && e.length >= 5 && e.every((x) => typeof x === 'number')) : [];
+})();
+if (E.cfg && !E.rascunho) E.rascunho = clonar(E.cfg);
+if (!E.cfg) E.rascunho = null;
+if (E.saidaProg < 0 || E.saidaProg > 3) E.saidaProg = 0;
+
+const nomeSaida = (i, c) => { c = c || E.cfg || E.rascunho; return (c && c.s[i] && c.s[i].n) || NOMES_PADRAO[i]; };
+const ehValvula = (i) => i === 0 || i === 1;
+
+// ---------- tempo do controlador ----------
+function tzAtual() { return E.cfg ? num(E.cfg.tz, fusoCelular()) : fusoCelular(); }
+function agoraEp() {
+  if (conectado() && E.st && isFinite(E.st.ep) && E.st.ep > 0) return E.st.ep + (performance.now() - E.stEm) / 1000;
+  return Date.now() / 1000;
+}
+function horaValida() { return conectado() && E.st ? !!E.st.hv : true; }
+const localDe = (ep) => ep + tzAtual() * 60;
+const diaDe = (ep) => Math.floor(localDe(ep) / 86400);
+const dataLocal = (ep) => new Date(localDe(ep) * 1000);   // ler sempre com getUTC*
+function hhmmEp(ep) { const d = dataLocal(ep); return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()); }
+function hhmmssEp(ep) { const d = dataLocal(ep); return hhmmEp(ep) + ':' + pad(d.getUTCSeconds()); }
+// "14:30" (hoje) · "qui 08:00" (esta semana) · "28/10 08:00"
+function quando(ep, ref) {
+  const dd = diaDe(ep) - diaDe(ref);
+  if (dd === 0) return hhmmEp(ep);
+  if (Math.abs(dd) < 7) return DIAS_CURTOS[Agenda.diaDaSemana(diaDe(ep))] + ' ' + hhmmEp(ep);
+  const d = dataLocal(ep);
+  return pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + ' ' + hhmmEp(ep);
+}
+function quandoAs(ep, ref) { return diaDe(ep) === diaDe(ref) ? 'às ' + hhmmEp(ep) : quando(ep, ref); }
+function nomeDia(D, hojeD) {
+  if (D === hojeD) return 'Hoje';
+  if (D === hojeD - 1) return 'Ontem';
+  const d = new Date(D * 86400000);
+  let t = DIAS_LONGOS[d.getUTCDay()] + ', ' + d.getUTCDate() + ' de ' + MESES[d.getUTCMonth()];
+  const anoHoje = new Date(hojeD * 86400000).getUTCFullYear();
+  if (d.getUTCFullYear() !== anoHoje) t += ' de ' + d.getUTCFullYear();
+  return t;
+}
+
+// =====================================================================
+// Avisos rápidos (toasts) e folhas (diálogos)
+// =====================================================================
+function aviso(texto, tipo) {
+  const caixa = $('#toasts');
+  const el = h('div', { class: 'toast', dataset: { tipo: tipo || 'info' } },
+    icone(tipo === 'erro' ? 'alerta' : tipo === 'ok' ? 'ok' : 'info'), h('span', { text: texto }));
+  caixa.append(el);
+  while (caixa.children.length > 3) caixa.firstChild.remove();
+  setTimeout(() => el.remove(), tipo === 'erro' ? 6000 : 3800);
+}
+
+let folhaAtual = null;
+// Abre a folha de baixo. montar(form, fechar) monta o conteúdo; devolve o valor escolhido (ou null).
+function abrirFolha(titulo, montar) {
+  const dlg = $('#folha');
+  if (folhaAtual) folhaAtual.fechar(null);
+  return new Promise((resolve) => {
+    let resultado = null, acabou = false;
+    const form = h('form', { class: 'folha-in', method: 'dialog', novalidate: true });
+    form.append(h('h2', { id: 'folhaTitulo', text: titulo }));
+    const fechar = (valor) => {
+      if (acabou) return;
+      acabou = true;
+      resultado = valor;
+      folhaAtual = null;
+      if (dlg.open) dlg.close();
+      dlg.replaceChildren();
+      resolve(resultado);
+    };
+    folhaAtual = { fechar };
+    montar(form, fechar);
+    form.addEventListener('submit', (e) => e.preventDefault());
+    dlg.replaceChildren(form);
+    // Esc / voltar do Android = cancelar (o evento 'close' não é usado: chegaria atrasado)
+    dlg.oncancel = (e) => { e.preventDefault(); fechar(null); };
+    dlg.onclick = (e) => { if (e.target === dlg) fechar(null); };
+    dlg.showModal();
+    const foco = form.querySelector('[autofocus]');
+    if (foco) foco.focus();
+  });
+}
+function confirmar(titulo, texto, rotuloSim, perigoso) {
+  return abrirFolha(titulo, (form, fechar) => {
+    if (texto) form.append(h('p', { class: 'folha-texto', text: texto }));
+    form.append(h('div', { class: 'folha-botoes' },
+      h('button', { type: 'button', class: 'btn', onclick: () => fechar(false) }, 'Cancelar'),
+      h('button', { type: 'button', class: 'btn ' + (perigoso ? 'btn-perigo' : 'btn-pri'), onclick: () => fechar(true) }, rotuloSim || 'Confirmar')));
+  }).then((v) => v === true);
+}
+// Escolha de tempo: opcoes = [números]; unidade 'min' ou 'h'.
+function escolherTempo(titulo, texto, opcoes, unidade, maximo) {
+  return abrirFolha(titulo, (form, fechar) => {
+    if (texto) form.append(h('p', { class: 'folha-texto', text: texto }));
+    const grade = h('div', { class: 'opcoes', role: 'group', 'aria-label': 'Escolha o tempo' });
+    opcoes.forEach((o) => {
+      const rot = unidade === 'min' ? (o >= 60 ? fmtDuracao(o) : o + ' min') : o + ' h';
+      grade.append(h('button', { type: 'button', class: 'btn', onclick: () => fechar(o) }, rot));
+    });
+    form.append(grade);
+    const id = novoId('outro');
+    const entrada = h('input', { id: id, class: 'entrada', type: 'text', inputmode: 'numeric', autocomplete: 'off', placeholder: unidade === 'min' ? 'ex.: 45' : 'ex.: 36' });
+    const erro = h('p', { class: 'folha-erro', role: 'alert', hidden: true });
+    const usar = () => {
+      const n = Math.round(lerDec(entrada.value));
+      if (!isFinite(n) || n < 1 || n > maximo) {
+        erro.textContent = 'Digite um número de 1 a ' + maximo + '.';
+        erro.hidden = false;
+        entrada.setAttribute('aria-invalid', 'true');
+        return;
+      }
+      fechar(n);
+    };
+    entrada.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); usar(); } });
+    form.append(h('div', { class: 'folha-outro' },
+      h('label', { class: 'campo', for: id }, h('span', { text: 'Outro (' + (unidade === 'min' ? 'minutos' : 'horas') + ')' }),
+        h('div', { class: 'entrada-unid' }, entrada, h('em', { 'aria-hidden': 'true', text: unidade }))),
+      h('button', { type: 'button', class: 'btn', onclick: usar }, 'Usar')), erro);
+    form.append(h('div', { class: 'folha-botoes' }, h('button', { type: 'button', class: 'btn btn-texto', onclick: () => fechar(null) }, 'Cancelar')));
+  });
+}
+function pedirPin(mensagem, erroAntes) {
+  return abrirFolha('PIN do controlador', (form, fechar) => {
+    form.append(h('p', { class: 'folha-texto', text: mensagem }));
+    const id = novoId('pin');
+    const entrada = h('input', { id: id, class: 'entrada mono', type: 'password', inputmode: 'numeric', autocomplete: 'off', maxlength: '8', autofocus: true, 'aria-describedby': id + 'e' });
+    const erro = h('p', { class: 'folha-erro', id: id + 'e', role: 'alert', text: erroAntes || '', hidden: !erroAntes });
+    const entrar = () => {
+      const v = entrada.value.trim();
+      if (!/^\d{1,8}$/.test(v)) { erro.textContent = 'O PIN tem de 1 a 8 números.'; erro.hidden = false; return; }
+      fechar(v);
+    };
+    entrada.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); entrar(); } });
+    form.append(h('label', { class: 'campo', for: id }, h('span', { text: 'PIN' }), entrada), erro,
+      h('div', { class: 'folha-botoes' },
+        h('button', { type: 'button', class: 'btn', onclick: () => fechar(null) }, 'Cancelar'),
+        h('button', { type: 'button', class: 'btn btn-pri', onclick: entrar }, 'Entrar')));
+  });
+}
+
+// =====================================================================
+// Bluetooth (PROTOCOLO §7 e §8)
+// =====================================================================
+class ErroRega extends Error {
+  constructor(tipo, msg) { super(msg); this.tipo = tipo; }
+}
+const lig = {
+  estado: 'desligado',      // desligado | procurando | conectando | pin | conectado | semsinal | reconectando | sembt
+  detalhe: '',
+  aparelho: null, rx: null, tx: null,
+  decoder: null, buf: '', descartando: false,
+  mtu: 0, oi: null,
+  fila: Promise.resolve(),
+  geracao: 0,
+  pendentes: [],
+  querLigado: false,        // o dono quer ficar conectado (para reconectar sozinho)
+  tentativas: 0, timerReconexao: null, proximaTentativa: 0,
+  abortarBusca: null, timerBusca: null,
+  ultimoSt: 0,
+  adotarCfg: false, cfgEnviada: null, canonEnviado: '', enviandoCfg: false,
+  lixo: false,              // uma linha ficou pela metade no controlador (escrita falhou no meio)
+  errIgnorar: 0,            // respostas err sem tipo que vêm por causa da linha pela metade
+  pinErrados: 0,            // PINs errados seguidos que este app viu (o controlador trava no 5º)
+  travaAte: 0               // Date.now() até quando o controlador recusa o PIN (§7.1)
+};
+function conectado() { return lig.estado === 'conectado' || lig.estado === 'semsinal'; }
+
+const TEXTO_ESTADO = {
+  desligado: 'Desconectado', procurando: 'Procurando…', conectando: 'Conectando…', pin: 'Esperando PIN',
+  conectado: 'Conectado', semsinal: 'Sem sinal', reconectando: 'Reconectando…', sembt: 'Sem Bluetooth'
+};
+function definirEstado(estado, detalhe) {
+  const mudou = lig.estado !== estado;
+  lig.estado = estado;
+  lig.detalhe = detalhe || '';
+  const pil = $('#topoEstado');
+  pil.dataset.estado = estado;
+  const txt = TEXTO_ESTADO[estado] || estado;
+  if ($('#topoEstadoTxt').textContent !== txt) $('#topoEstadoTxt').textContent = txt;
+  if (mudou) { atualizarTudo(); } else atualizarConexao();
+}
+
+function lembrarAparelho(ap) { gravar('dispositivo', { id: ap.id, nome: ap.name || '' }); }
+function pinsSalvos() { const p = ler('pins', {}); return p && typeof p === 'object' ? p : {}; }
+function guardarPin(idAparelho, pin) {
+  const p = pinsSalvos();
+  if (pin) p[idAparelho] = pin; else delete p[idAparelho];
+  gravar('pins', p);
+}
+
+function comTempo(promessa, ms, msg) {
+  return new Promise((ok, falha) => {
+    const t = setTimeout(() => falha(new ErroRega('tempo', msg || 'Demorou demais.')), ms);
+    promessa.then((v) => { clearTimeout(t); ok(v); }, (e) => { clearTimeout(t); falha(e); });
+  });
+}
+
+// ---------- envio (fila: uma escrita GATT por vez) ----------
+function tamanhoPedaco() {
+  return lig.mtu >= 23 ? Math.min(lig.mtu - 3, 500) : 20;
+}
+async function escreverPedaco(rx, pedaco) {
+  for (let tentativa = 0; ; tentativa++) {
+    try {
+      if (typeof rx.writeValueWithResponse === 'function') await rx.writeValueWithResponse(pedaco);
+      else await rx.writeValue(pedaco);
+      return;
+    } catch (e) {
+      if (tentativa >= 2 || !lig.aparelho || !lig.aparelho.gatt.connected) throw e;
+      await esperar(80 * (tentativa + 1));
+    }
+  }
+}
+// Corta a linha em pedaços de até "tam" bytes. O último pedaço nunca é só o "\n": assim, se um
+// pedaço se perder, o que chegou ao controlador nunca é um JSON completo (ele não executa nada).
+function pedacosDe(bytes, tam) {
+  const l = [];
+  for (let i = 0; i < bytes.length; i += tam) l.push([i, Math.min(i + tam, bytes.length)]);
+  const n = l.length;
+  if (n > 1 && l[n - 1][1] - l[n - 1][0] === 1) { l[n - 2][1]--; l[n - 1][0]--; }
+  return l;
+}
+function escreverLinha(obj) {
+  const rx = lig.rx, g = lig.geracao;
+  let bytes = codificador.encode(JSON.stringify(obj) + '\n');
+  const tarefa = lig.fila.then(async () => {
+    if (g !== lig.geracao || lig.rx !== rx || !rx) throw new ErroRega('ligacao', 'Sem ligação com o controlador.');
+    let lixo = false;
+    if (lig.lixo) {
+      // a linha anterior ficou pela metade lá: um "\n" antes fecha aquela linha (o controlador
+      // responde err sem tipo para ela, e essa resposta é ignorada)
+      const b = new Uint8Array(bytes.length + 1);
+      b[0] = 10; b.set(bytes, 1);
+      bytes = b;
+      lixo = true;
+    }
+    const tam = tamanhoPedaco();
+    let enviados = 0;
+    try {
+      for (const [a, b] of pedacosDe(bytes, tam)) {
+        // escrita que nunca termina (ligação morta sem aviso): desiste em 5 s
+        await comTempo(escreverPedaco(rx, bytes.slice(a, b)), TEMPO_RESPOSTA, 'O controlador não respondeu. Tente de novo.');
+        if (lixo && a === 0) { lig.lixo = false; lig.errIgnorar++; lixo = false; }
+        enviados = b;
+      }
+    } catch (e) {
+      if (g === lig.geracao && enviados > 0) lig.lixo = true;
+      if (e && e.tipo === 'tempo' && g === lig.geracao) {
+        // a fila do Bluetooth ficou presa: derruba a ligação (a reconexão automática refaz)
+        try { if (lig.aparelho) lig.aparelho.gatt.disconnect(); } catch (x) { /* nada */ }
+      }
+      throw e;
+    }
+  });
+  lig.fila = tarefa.catch(() => {});
+  return tarefa;
+}
+// Manda um comando e espera a resposta. espera: 'ok' (ok/err com r), 'oi', 'auth', 'cfg', 'log'.
+function pedir(obj, espera) {
+  espera = espera || 'ok';
+  return new Promise((resolve, reject) => {
+    if (!lig.rx) { reject(new ErroRega('ligacao', 'Sem ligação com o controlador.')); return; }
+    const p = { espera, r: obj.t, resolve, reject, timer: null, lista: [] };
+    const armar = () => {
+      clearTimeout(p.timer);
+      p.timer = setTimeout(() => {
+        removerPendente(p);
+        reject(new ErroRega('tempo', 'O controlador não respondeu. Tente de novo.'));
+      }, TEMPO_RESPOSTA);
+    };
+    p.armar = armar;
+    lig.pendentes.push(p);
+    escreverLinha(obj).then(armar, (e) => {
+      removerPendente(p);
+      reject(e instanceof ErroRega ? e : new ErroRega('escrita', 'Não deu para mandar ao controlador.'));
+    });
+  });
+}
+function removerPendente(p) {
+  clearTimeout(p.timer);
+  const i = lig.pendentes.indexOf(p);
+  if (i >= 0) lig.pendentes.splice(i, 1);
+}
+function acharPendente(fn) { return lig.pendentes.find(fn); }
+function rejeitarTodos(msg) {
+  const lista = lig.pendentes.splice(0);
+  lista.forEach((p) => { clearTimeout(p.timer); p.reject(new ErroRega('ligacao', msg)); });
+}
+
+// ---------- recebimento: junta os pedaços até "\n" ----------
+function aoReceber(ev) {
+  if (ev.target !== lig.tx) return;
+  const v = ev.target.value;
+  if (!v) return;
+  const bytes = new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
+  lig.buf += lig.decoder.decode(bytes, { stream: true });
+  let idx;
+  while ((idx = lig.buf.indexOf('\n')) >= 0) {
+    const linha = lig.buf.slice(0, idx);
+    lig.buf = lig.buf.slice(idx + 1);
+    if (lig.descartando) { lig.descartando = false; continue; }
+    if (!linha.trim()) continue;
+    if (linha.length > 1300 && bytesUtf8(linha) > 4096) continue; // linha grande demais
+    let m;
+    try { m = JSON.parse(linha); } catch (e) { continue; }
+    if (!m || typeof m !== 'object') continue;
+    try { aoMensagem(m); } catch (e) { console.warn('Mensagem não tratada', m, e); }
+  }
+  if (lig.buf.length > 4096 && bytesUtf8(lig.buf) > 4096) { lig.buf = ''; lig.descartando = true; }
+}
+
+function aoMensagem(m) {
+  let p;
+  switch (m.t) {
+    case 'st': aoSt(m); break;
+    case 'i': aoCorrente(m.i); break;
+    case 'ev': if (Array.isArray(m.e)) juntarEventos([m.e]); break;
+    case 'log':
+      if (Array.isArray(m.l)) juntarEventos(m.l, true);
+      p = acharPendente((x) => x.espera === 'log');
+      if (p) {
+        if (m.fim) { removerPendente(p); p.resolve(true); } else p.armar();
+      }
+      break;
+    case 'cfg':
+      aoCfg(m.c);
+      p = acharPendente((x) => x.espera === 'cfg');
+      if (p) { removerPendente(p); p.resolve(m.c); }
+      break;
+    case 'oi':
+    case 'auth':
+      p = acharPendente((x) => x.espera === m.t);
+      if (p) { removerPendente(p); p.resolve(m); }
+      break;
+    case 'ok':
+      p = acharPendente((x) => x.r === m.r && x.espera === 'ok');
+      if (p) { removerPendente(p); p.resolve(m); }
+      break;
+    case 'err': {
+      // linha que o controlador não conseguiu ler vem sem tipo (r = "" ou "?"): é do pedido mais antigo
+      const semTipo = !m.r || m.r === '?';
+      if (semTipo && lig.errIgnorar > 0) { lig.errIgnorar--; break; } // era a linha pela metade
+      p = semTipo ? lig.pendentes[0] : acharPendente((x) => x.r === m.r);
+      if (p) {
+        removerPendente(p);
+        const msg = m.m === 'pin' ? 'O controlador pediu o PIN.' : semTipo ? 'O controlador não entendeu o pedido. Tente de novo.' : (m.m || 'O controlador recusou.');
+        p.reject(new ErroRega('recusado', msg));
+      }
+      break;
+    }
+  }
+}
+
+// ---------- conectar ----------
+async function botaoConectar() {
+  if (!navigator.bluetooth) { mostrarSemBt(); return; }
+  if (segundosTrava() > 0) { aviso(textoTrava()); return; }
+  let ap;
+  try {
+    // precisa ser a primeira coisa do toque (gesto do usuário)
+    ap = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICO] }] });
+  } catch (e) {
+    const msg = String((e && e.message) || '');
+    if (e && e.name === 'NotFoundError' && /adapter|Bluetooth.*(off|desligado)/i.test(msg)) aviso('Ligue o Bluetooth do celular e tente de novo.', 'erro');
+    else if (e && e.name === 'NotFoundError') aviso('Nenhum controlador escolhido.');
+    else if (e && (e.name === 'SecurityError' || e.name === 'NotAllowedError')) aviso('O Chrome não deixou usar o Bluetooth. Veja as permissões do site (Bluetooth e localização).', 'erro');
+    else aviso('Não deu para procurar o controlador. ' + msg, 'erro');
+    return;
+  }
+  lembrarAparelho(ap);
+  lig.querLigado = true;
+  lig.tentativas = 0;
+  conectar(ap, true);
+}
+
+function prepararAparelho(ap) {
+  if (lig.aparelho && lig.aparelho !== ap) {
+    lig.aparelho.removeEventListener('gattserverdisconnected', aoDesconectar);
+  }
+  lig.aparelho = ap;
+  ap.removeEventListener('gattserverdisconnected', aoDesconectar);
+  ap.addEventListener('gattserverdisconnected', aoDesconectar);
+}
+
+async function conectar(ap, interativo) {
+  pararReconexao();
+  pararBusca();
+  const g = ++lig.geracao;
+  prepararAparelho(ap);
+  limparLigacao();
+  definirEstado(interativo ? 'conectando' : 'reconectando', interativo ? '' : 'Tentando falar com o controlador…');
+  const checar = () => { if (g !== lig.geracao) throw new ErroRega('cancelado', 'cancelado'); };
+  try {
+    const servidor = await comTempo(ap.gatt.connect(), 15000, 'O controlador não respondeu.');
+    checar();
+    const servico = await servidor.getPrimaryService(SERVICO);
+    const rx = await servico.getCharacteristic(RX_UUID);
+    const tx = await servico.getCharacteristic(TX_UUID);
+    checar();
+    lig.rx = rx; lig.tx = tx;
+    lig.decoder = new TextDecoder('utf-8');
+    lig.buf = ''; lig.descartando = false; lig.mtu = 0;
+    lig.fila = Promise.resolve();
+    // o histórico novo é pedido a partir do que já estava guardado ANTES desta ligação
+    // (eventos que chegam por "ev" durante o aperto de mão não podem esconder os antigos)
+    let deLog = epMaisNovo();
+    tx.addEventListener('characteristicvaluechanged', aoReceber);
+    try { await tx.startNotifications(); } catch (e) { await esperar(300); checar(); await tx.startNotifications(); }
+    checar();
+    definirEstado('conectando');
+    const oi = await pedir({ t: 'oi' }, 'oi');
+    checar();
+    lig.oi = oi;
+    lig.mtu = num(oi.mtu, 0);
+    if (trocarControlador(oi)) deLog = null;
+    if (oi.pin) {
+      const ok = await autenticar(ap, g);
+      checar();
+      if (!ok) { desconectar(true); return; }
+    }
+    await acertarHora();
+    checar();
+    await pedir({ t: 'cfg?' }, 'cfg');
+    checar();
+    lig.ultimoSt = performance.now();
+    lig.tentativas = 0;
+    definirEstado('conectado');
+    if (interativo) aviso('Conectado a ' + (oi.nome || 'controlador') + '.', 'ok');
+    pedirLog(false, deLog).catch(() => {});
+  } catch (e) {
+    if (g !== lig.geracao) return; // outra tentativa tomou o lugar
+    // desliga também um connect() que ainda estava pendurado (senão ele pode completar depois)
+    try { ap.gatt.disconnect(); } catch (x) { /* nada */ }
+    limparLigacao();
+    if (interativo) {
+      lig.querLigado = false;
+      definirEstado('desligado');
+      aviso('Não conectou. Chegue mais perto do controlador e tente de novo.' + (e && e.message && e.tipo !== 'tempo' ? ' (' + e.message + ')' : ''), 'erro');
+    } else {
+      agendarReconexao();
+    }
+  }
+}
+
+// Manda a hora do celular (§3). Sem "tz": o fuso do controlador só muda em Ajustes (§12: as contas
+// usam o fuso do controlador; um celular em viagem não pode mudar a hora da rega sem aviso).
+async function acertarHora() {
+  const ep = Math.floor(Date.now() / 1000);
+  if (ep < HORA_VALIDA) {
+    aviso('O relógio deste celular está errado. Acerte a data e a hora do celular e conecte de novo.', 'erro');
+    return;
+  }
+  try {
+    await pedir({ t: 'hora', ep: ep }, 'ok');
+  } catch (e) {
+    if (!e || e.tipo !== 'recusado') throw e;
+    // hora recusada não impede de usar o controlador (o manual funciona sem hora)
+    aviso('O controlador não aceitou a hora deste celular: ' + e.message, 'erro');
+  }
+}
+
+// ---------- PIN (§7.1) ----------
+function segundosTrava() { return Math.max(0, Math.ceil((lig.travaAte - Date.now()) / 1000)); }
+function textoTrava() { return 'Muitos PINs errados. O controlador só aceita de novo em ' + segundosTrava() + ' s.'; }
+function travarPin(seg) {
+  lig.travaAte = Date.now() + Math.max(1, seg) * 1000;
+  lig.pinErrados = 0;
+  if (folhaAtual) folhaAtual.fechar(null);
+  aviso(textoTrava(), 'erro');
+}
+async function autenticar(ap, g) {
+  let salvo = pinsSalvos()[ap.id];
+  let erroAntes = '';
+  for (;;) {
+    let pin = salvo;
+    if (!pin) {
+      definirEstado('pin');
+      pin = await pedirPin('Este controlador tem PIN. Digite para entrar.', erroAntes);
+      if (g !== lig.geracao) return false;
+      if (pin === null) { lig.querLigado = false; return false; }
+      definirEstado('conectando');
+    }
+    let r;
+    try {
+      r = await pedir({ t: 'auth', pin: String(pin) }, 'auth');
+    } catch (e) {
+      // o controlador desliga logo depois do 5º PIN errado: a resposta pode não chegar
+      if (e && e.tipo === 'ligacao' && lig.pinErrados >= 4) { travarPin(60); return false; }
+      throw e;
+    }
+    if (r.ok) { lig.pinErrados = 0; guardarPin(ap.id, pin); return true; }
+    if (num(r.espera, 0) > 0) {
+      // travado: o PIN guardado pode estar certo, então não é apagado
+      travarPin(num(r.espera, 60));
+      return false;
+    }
+    lig.pinErrados++;
+    if (salvo) { salvo = null; guardarPin(ap.id, null); erroAntes = 'O PIN guardado não serve mais.'; continue; }
+    erroAntes = lig.pinErrados >= 3 ? 'PIN errado. Cuidado: com 5 erros seguidos o controlador recusa o PIN por 1 minuto.' : 'PIN errado. Tente de novo.';
+  }
+}
+
+function limparLigacao() {
+  if (lig.tx) { try { lig.tx.removeEventListener('characteristicvaluechanged', aoReceber); } catch (e) { /* nada */ } }
+  lig.rx = null; lig.tx = null; lig.buf = ''; lig.mtu = 0;
+  // o controlador limpa o que recebeu pela metade quando a ligação cai
+  lig.lixo = false; lig.errIgnorar = 0;
+  // uma configuração que estava indo: a resposta não vem mais (o rascunho fica como está)
+  lig.adotarCfg = false; lig.cfgEnviada = null;
+  rejeitarTodos('A ligação caiu.');
+}
+
+function aoDesconectar(ev) {
+  if (ev && ev.target && ev.target !== lig.aparelho) return;
+  const estava = lig.estado;
+  limparLigacao();
+  if (estava === 'pin') {
+    // PIN errado muitas vezes: o controlador desliga (a tentativa em andamento termina sozinha)
+    if (folhaAtual) folhaAtual.fechar(null);
+    aviso('O controlador desligou a ligação.', 'erro');
+    return;
+  }
+  // tentativa em andamento: ela mesma cuida do erro
+  if (estava === 'conectando' || estava === 'reconectando' || estava === 'procurando') return;
+  if (lig.querLigado) {
+    lig.tentativas = 0;
+    agendarReconexao(true);
+  } else {
+    definirEstado('desligado');
+  }
+}
+
+function agendarReconexao(imediata) {
+  clearTimeout(lig.timerReconexao);
+  if (!lig.querLigado || !lig.aparelho) { definirEstado('desligado'); return; }
+  if (document.visibilityState !== 'visible') {
+    definirEstado('reconectando', 'Volta a tentar quando o app estiver aberto.');
+    return;
+  }
+  lig.tentativas++;
+  if (lig.tentativas > 12) {
+    lig.querLigado = false;
+    definirEstado('desligado', 'O controlador não respondeu. Chegue perto e toque em Conectar.');
+    return;
+  }
+  const atraso = imediata ? 400 : Math.min(30000, 1000 * Math.pow(2, lig.tentativas - 1));
+  lig.proximaTentativa = Date.now() + atraso;
+  definirEstado('reconectando', 'Nova tentativa em breve.');
+  lig.timerReconexao = setTimeout(() => {
+    lig.timerReconexao = null;
+    if (lig.querLigado && lig.aparelho && !conectado()) conectar(lig.aparelho, false);
+  }, atraso);
+}
+function pararReconexao() { clearTimeout(lig.timerReconexao); lig.timerReconexao = null; lig.proximaTentativa = 0; }
+
+function pararBusca() {
+  if (lig.abortarBusca) { try { lig.abortarBusca.abort(); } catch (e) { /* nada */ } }
+  lig.abortarBusca = null;
+  clearTimeout(lig.timerBusca);
+}
+
+function desconectar(silencioso) {
+  lig.querLigado = false;
+  pararReconexao();
+  pararBusca();
+  lig.geracao++;
+  const ap = lig.aparelho;
+  limparLigacao();
+  try { if (ap && ap.gatt.connected) ap.gatt.disconnect(); } catch (e) { /* nada */ }
+  definirEstado('desligado');
+  if (!silencioso) aviso('Desconectado.');
+}
+
+// Ao abrir o app: tenta voltar ao último controlador sem pedir nada.
+async function reconectarAoAbrir() {
+  if (!navigator.bluetooth || typeof navigator.bluetooth.getDevices !== 'function') return;
+  const lembrado = ler('dispositivo', null);
+  if (!lembrado || !lembrado.id) return;
+  let lista;
+  try { lista = await navigator.bluetooth.getDevices(); } catch (e) { return; }
+  const ap = (lista || []).find((d) => d.id === lembrado.id);
+  if (!ap || lig.querLigado) return;
+  lig.querLigado = true;
+  lig.tentativas = 0;
+  prepararAparelho(ap);
+  if (typeof ap.watchAdvertisements === 'function') {
+    definirEstado('procurando', 'Procurando o controlador por perto…');
+    const ctrl = new AbortController();
+    lig.abortarBusca = ctrl;
+    const achou = () => {
+      ap.removeEventListener('advertisementreceived', achou);
+      if (lig.abortarBusca !== ctrl) return;
+      pararBusca();
+      conectar(ap, false);
+    };
+    ap.addEventListener('advertisementreceived', achou);
+    lig.timerBusca = setTimeout(() => {
+      if (lig.abortarBusca !== ctrl) return;
+      ap.removeEventListener('advertisementreceived', achou);
+      pararBusca();
+      lig.querLigado = false;
+      definirEstado('desligado', 'Não achei o controlador por perto. Toque em Conectar.');
+    }, 60000); // 1 minuto procurando (dá tempo de chegar perto do controlador)
+    try {
+      await ap.watchAdvertisements({ signal: ctrl.signal });
+    } catch (e) {
+      ap.removeEventListener('advertisementreceived', achou);
+      if (lig.abortarBusca === ctrl) { pararBusca(); conectar(ap, false); }
+    }
+  } else {
+    conectar(ap, false);
+  }
+}
+
+// Devolve true se era outro controlador (dados antigos apagados).
+function trocarControlador(oi) {
+  const id = String(oi.id || '');
+  let outro = false;
+  if (E.ctrl && E.ctrl.id && id && E.ctrl.id !== id) {
+    outro = true;
+    // outro controlador: não mistura dados
+    E.cfg = null; E.rascunho = null; E.eventos = []; E.alarmesVistos = { ep: 0, ch: [] }; E.st = null;
+    gravar('cfg', null); gravar('rascunho', null); gravar('eventos', []); gravar('alarmesVistos', null);
+  }
+  E.ctrl = { id: id, nome: String(oi.nome || ''), fw: String(oi.fw || ''), rtc: num(oi.rtc, 0) };
+  gravar('ctrl', E.ctrl);
+  return outro;
+}
+
+// ---------- mensagens que chegam ----------
+function aoSt(m) {
+  if (!m || !Array.isArray(m.s)) return;
+  E.st = m;
+  E.stEm = performance.now();
+  lig.ultimoSt = E.stEm;
+  if (lig.estado === 'semsinal') definirEstado('conectado');
+  else atualizarPainel();
+}
+
+function aoCorrente(i) {
+  if (!Array.isArray(i)) return;
+  const v = [i[0] === null || i[0] === undefined ? null : num(i[0], null), i[1] === null || i[1] === undefined ? null : num(i[1], null)];
+  E.ultimaI = v;
+  const t = Date.now();
+  E.amostras.push({ t: t, v: v });
+  const corte = t - JANELA_MS - 5000;
+  let k = 0;
+  while (k < E.amostras.length && E.amostras[k].t < corte) k++;
+  if (k) E.amostras.splice(0, k);
+  if (E.aba === 'corrente' && document.visibilityState === 'visible') pedirDesenho();
+}
+
+function aoCfg(c) {
+  const n = normalizarCfg(c);
+  if (!n) return;
+  const anterior = E.cfg;
+  const semMudancas = !E.rascunho || !anterior || canon(E.rascunho) === canon(anterior);
+  // mexeu no rascunho enquanto a configuração ia: não apaga o que foi mexido
+  const mexeuNoEnvio = lig.adotarCfg && E.rascunho && canon(E.rascunho) !== lig.canonEnviado;
+  E.cfg = n;
+  gravar('cfg', n);
+  if (lig.adotarCfg && lig.cfgEnviada && !mexeuNoEnvio) {
+    const enviada = normalizarCfg(lig.cfgEnviada);
+    delete enviada.pin;
+    if (canon(enviada) !== canon(n)) aviso('O controlador ajustou alguns valores para ficar dentro dos limites.');
+  }
+  const adotar = (lig.adotarCfg && !mexeuNoEnvio) || (!lig.adotarCfg && semMudancas);
+  if (mexeuNoEnvio) aviso('Você mudou algo durante o envio. Toque em Enviar de novo para gravar.');
+  lig.adotarCfg = false;
+  lig.cfgEnviada = null;
+  if (adotar) {
+    const novo = clonar(n);
+    delete novo.pin;
+    if (!E.rascunho || canon(novo) !== canon(E.rascunho)) {
+      E.rascunho = novo;
+      renderAba(true);
+    } else {
+      // igual ao que já está na tela: mantém o mesmo objeto (e o que está sendo digitado)
+      E.rascunho.temPin = novo.temPin;
+    }
+    gravar('rascunho', E.rascunho);
+  }
+  atualizarTudo();
+}
+
+// ---------- eventos (histórico guardado no celular) ----------
+const chaveEv = (e) => e[0] + '|' + e[1] + '|' + e[2] + '|' + e[3];
+// doLog = veio de um "log" (a ordem do controlador vale para eventos do mesmo segundo).
+// Eventos sem hora (ep = 0) iguais podem ser eventos diferentes (abriu, fechou, abriu de novo…):
+// "ev" nunca repete, então entra sempre; num "log", entra só o que passa da quantidade guardada.
+let contagemLogSemHora = new Map();   // zerada a cada pedido de log
+function juntarEventos(lista, doLog) {
+  let mudou = false;
+  const chaves = new Set(E.eventos.map(chaveEv));
+  for (const bruto of lista) {
+    if (!Array.isArray(bruto) || bruto.length < 5) continue;
+    const e = bruto.slice(0, 5).map((x) => num(x, 0));
+    const k = chaveEv(e);
+    if (e[0] === 0) {
+      if (doLog) {
+        const kv = k + '|' + e[4];
+        const n = (contagemLogSemHora.get(kv) || 0) + 1;
+        contagemLogSemHora.set(kv, n);
+        if (E.eventos.filter((x) => chaveEv(x) + '|' + x[4] === kv).length >= n) continue;
+      }
+      E.eventos.push(e);
+      chaves.add(k);
+      mudou = true;
+      continue;
+    }
+    if (chaves.has(k)) {
+      if (!doLog) continue;
+      // já tinha (chegou por "ev"): põe na posição que o controlador manda
+      const i = E.eventos.findIndex((x) => chaveEv(x) === k);
+      if (i >= 0) E.eventos.splice(i, 1);
+      E.eventos.push(e);
+      mudou = true;
+      continue;
+    }
+    if (e[0] > 0) {
+      // versão com hora certa de um evento guardado sem hora (ep = 0): troca
+      const i = E.eventos.findIndex((x) => x[0] === 0 && x[1] === e[1] && x[2] === e[2] && x[3] === e[3] && x[4] === e[4]);
+      if (i >= 0) { chaves.delete(chaveEv(E.eventos[i])); E.eventos.splice(i, 1); }
+    }
+    E.eventos.push(e);
+    chaves.add(k);
+    mudou = true;
+  }
+  if (!mudou) return;
+  // por hora; os sem hora (ep = 0) vão para o fim; empate mantém a ordem de chegada
+  E.eventos.sort((a, b) => { const x = a[0] > 0 ? a[0] : Infinity, y = b[0] > 0 ? b[0] : Infinity; return x === y ? 0 : x < y ? -1 : 1; });
+  if (E.eventos.length > MAX_EVENTOS) E.eventos.splice(0, E.eventos.length - MAX_EVENTOS);
+  gravar('eventos', E.eventos);
+  renderAlarmes();
+  if (E.aba === 'historico') renderHistorico();
+  if (E.aba === 'corrente') atualizarPicos();
+}
+function epMaisNovo() {
+  let m = null;
+  for (const e of E.eventos) if (e[0] > 0 && (m === null || e[0] > m)) m = e[0];
+  return m;
+}
+// de = undefined → usa o evento mais novo guardado; null → pede todos
+async function pedirLog(manual, de) {
+  if (!conectado() && lig.estado !== 'conectando') { if (manual) aviso('Conecte ao controlador para atualizar.'); return; }
+  if (de === undefined) de = epMaisNovo();
+  const pedido = de === null ? { t: 'log?' } : { t: 'log?', de: de };
+  contagemLogSemHora = new Map();
+  try {
+    await pedir(pedido, 'log');
+    if (manual) aviso('Histórico atualizado.', 'ok');
+  } catch (e) {
+    if (manual) aviso(e.message, 'erro');
+  }
+}
+
+// =====================================================================
+// Comandos do painel
+// =====================================================================
+async function comando(obj, textoOk, botao) {
+  if (!conectado()) { aviso('Conecte ao controlador primeiro.'); return false; }
+  if (botao) { botao.disabled = true; botao.setAttribute('aria-busy', 'true'); }
+  try {
+    await pedir(obj, 'ok');
+    if (textoOk) aviso(textoOk, 'ok');
+    return true;
+  } catch (e) {
+    aviso(e.message || 'O controlador não aceitou.', 'erro');
+    return false;
+  } finally {
+    if (botao) { botao.removeAttribute('aria-busy'); }
+    atualizarPainel();
+  }
+}
+
+function verbo(i, on, passado) {
+  if (ehValvula(i)) return on ? (passado ? 'aberta' : 'Abre') : (passado ? 'fechada' : 'Fecha');
+  return on ? (passado ? 'ligada' : 'Liga') : (passado ? 'desligada' : 'Desliga');
+}
+
+async function acaoLigar(i, botao) {
+  const valvula = ehValvula(i);
+  const min = await escolherTempo((valvula ? 'Abrir ' : 'Ligar ') + nomeSaida(i) + ' por quanto tempo?',
+    'Depois desse tempo volta sozinho ao programa.', DURACOES_MIN, 'min', 1440);
+  if (!min) return;
+  const agora = Math.floor(agoraEp());
+  await comando({ t: 'man', s: i, on: 1, ate: agora + min * 60 }, nomeSaida(i) + ' ' + verbo(i, true, true) + ' por ' + fmtDuracao(min) + '.', botao);
+}
+async function acaoDesligar(i, botao) {
+  const regras = E.cfg.s[i].r;
+  const agora = Math.floor(agoraEp());
+  const tz = tzAtual();
+  if (horaValida() && Agenda.programaAtivo(regras, agora + tz * 60)) {
+    // o programa manda ligado agora: desliga até a próxima mudança do programa (máx. 24 h)
+    const pm = Agenda.proximaMudanca(regras, agora, tz);
+    const ate = Math.min(pm ? pm.ep : Infinity, agora + 86400);
+    await comando({ t: 'man', s: i, on: 0, ate: ate }, nomeSaida(i) + ' ' + verbo(i, false, true) + ' até ' + quando(ate, agora) + '.', botao);
+  } else {
+    await comando({ t: 'man', s: i, on: 0, ate: 0 }, nomeSaida(i) + ' ' + verbo(i, false, true) + '.', botao);
+  }
+}
+async function acaoPrograma(i, botao) {
+  await comando({ t: 'man', s: i, on: 0, ate: 0 }, nomeSaida(i) + ' voltou ao programa.', botao);
+}
+async function acaoLiberar(i, botao) {
+  await comando({ t: 'lib', s: i }, nomeSaida(i) + ' liberada.', botao);
+}
+async function acaoPausar(i, botao) {
+  const hrs = await escolherTempo('Pausar ' + nomeSaida(i) + ' por quanto tempo?', 'Na pausa o programa não liga esta saída.', PAUSAS_H, 'h', 720);
+  if (!hrs) return;
+  const ate = Math.floor(agoraEp()) + hrs * 3600;
+  await comando({ t: 'pausa', s: i, ate: ate }, nomeSaida(i) + ' pausada até ' + quando(ate, agoraEp()) + '.', botao);
+}
+async function acaoCancelarPausa(i, botao) {
+  await comando({ t: 'pausa', s: i, ate: 0 }, nomeSaida(i) + ': pausa cancelada.', botao);
+}
+function valvulasAtivas() { return E.cfg ? [0, 1].filter((i) => E.cfg.s[i].en) : []; }
+async function acaoChuva(botao) {
+  const vs = valvulasAtivas();
+  if (!vs.length || !E.st) return;
+  const agora = agoraEp();
+  if (vs.every((i) => E.st.s[i] && E.st.s[i].pa > agora)) {
+    if (!conectado()) { aviso('Conecte ao controlador primeiro.'); return; }
+    botao.disabled = true;
+    let ok = true;
+    for (const i of vs) ok = (await comando({ t: 'pausa', s: i, ate: 0 }, null)) && ok;
+    if (ok) aviso('Pausa da rega cancelada.', 'ok');
+    atualizarPainel();
+    return;
+  }
+  const hrs = await escolherTempo('Pausar a rega (chuva)', 'Durante a pausa as válvulas não abrem pelo programa. Os relés continuam normais.', PAUSAS_H, 'h', 720);
+  if (!hrs) return;
+  if (!conectado()) { aviso('Conecte ao controlador primeiro.'); return; }
+  const ate = Math.floor(agoraEp()) + hrs * 3600;
+  botao.disabled = true;
+  let ok = true;
+  const mais = [];
+  for (const i of vs) {
+    // válvula já pausada por mais tempo (ex.: manutenção): fica como está
+    const pa = E.st && E.st.s[i] ? num(E.st.s[i].pa, 0) : 0;
+    if (pa >= ate) { mais.push(nomeSaida(i) + ' já estava pausada até ' + quando(pa, agoraEp()) + '.'); continue; }
+    ok = (await comando({ t: 'pausa', s: i, ate: ate }, null)) && ok;
+  }
+  if (ok) aviso(['Rega pausada até ' + quando(ate, agoraEp()) + '.'].concat(mais).join(' '), 'ok');
+  atualizarPainel();
+}
+
+// =====================================================================
+// PAINEL
+// =====================================================================
+const cacheProx = [];
+// Próxima mudança de verdade (manual e pausa acabando, depois o programa).
+function calcularProxima(regras, s, hv, agora, tz) {
+  if (s.b) return null;
+  const prog = (t) => hv && Agenda.programaAtivo(regras, t + tz * 60);
+  const estadoEm = (t) => (s.ma && t < s.ma ? !!s.mo : s.pa && t < s.pa ? false : prog(t));
+  const atual = estadoEm(agora);
+  let t = agora;
+  for (let passo = 0; passo < 4; passo++) {
+    if ((s.ma && t < s.ma) || (s.pa && t < s.pa)) {
+      const fronteiras = [s.ma, s.pa].filter((x) => x && x > t);
+      t = Math.min.apply(null, fronteiras);
+      if (estadoEm(t) !== atual) return { ep: t, on: !atual };
+      continue;
+    }
+    if (!hv) return null;
+    const pm = Agenda.proximaMudanca(regras, t, tz);
+    return pm && pm.on !== atual ? pm : null;
+  }
+  return null;
+}
+function proximaEfetiva(i, agora) {
+  const regras = E.cfg.s[i].r;
+  const lig1 = conectado() && E.st && E.st.s[i];
+  const s = lig1 ? E.st.s[i] : {};
+  const hv = lig1 ? !!E.st.hv : true;
+  const tz = tzAtual();
+  const chave = JSON.stringify([regras, s.ma || 0, s.mo || 0, s.pa || 0, s.b || 0, hv, tz]);
+  const c = cacheProx[i];
+  if (c && c.chave === chave && agora >= c.desde && (c.res ? agora < c.res.ep : agora < c.desde + 600)) return c.res;
+  const res = calcularProxima(regras, s, hv, agora, tz);
+  cacheProx[i] = { chave: chave, desde: agora, res: res };
+  return res;
+}
+
+function montarCartoes() {
+  const caixa = $('#cartoesSaidas');
+  caixa.replaceChildren();
+  if (!E.cfg) { atualizarPainel(); return; }
+  E.cfg.s.forEach((sc, i) => {
+    if (!sc.en) return;
+    const valv = ehValvula(i);
+    const tit = novoId('saida');
+    const card = h('article', { class: 'cartao saida', dataset: { i: i, on: 'x' }, 'aria-labelledby': tit },
+      h('div', { class: 'saida-cab' }, h('h2', { id: tit, text: sc.n || NOMES_PADRAO[i] }), h('span', { class: 'saida-tipo', text: valv ? 'Válvula' : 'Relé' })),
+      h('div', { class: 'estado', 'aria-live': 'polite' }, h('span', { class: 'estado-ic' }), h('span', { class: 'palavra', text: '—' })),
+      h('p', { class: 'linha-ic porque' }, h('span', { class: 'porque-ic' }), h('span', { class: 'porque-txt' })),
+      h('p', { class: 'linha-ic proxima' }, icone('relogio'), h('span', { class: 'proxima-txt' })),
+      h('p', { class: 'detalhes' }),
+      h('div', { class: 'acoes-saida' },
+        h('button', { type: 'button', class: 'btn btn-pri', dataset: { acao: 'ligar', i: i } }, valv ? 'Abrir por…' : 'Ligar por…'),
+        h('button', { type: 'button', class: 'btn', dataset: { acao: 'desligar', i: i } }, valv ? 'Fechar' : 'Desligar'),
+        h('button', { type: 'button', class: 'btn btn-largo', dataset: { acao: 'programa', i: i }, hidden: true }, icone('volta'), 'Voltar ao programa'),
+        h('button', { type: 'button', class: 'btn btn-largo btn-perigo', dataset: { acao: 'liberar', i: i }, hidden: true }, icone('cadeado'), 'Liberar'),
+        h('button', { type: 'button', class: 'btn btn-largo', dataset: { acao: 'pausar', i: i } }, icone('pausa'), 'Pausar…'),
+        h('button', { type: 'button', class: 'btn btn-largo', dataset: { acao: 'cancelarPausa', i: i }, hidden: true }, 'Cancelar pausa')));
+    caixa.append(card);
+  });
+  atualizarPainel();
+}
+
+function trocarIcone(alvo, nome) {
+  if (alvo.dataset.ic === nome) return;
+  alvo.dataset.ic = nome;
+  alvo.replaceChildren(icone(nome));
+}
+function definirTexto(el, t) { if (el && el.textContent !== t) el.textContent = t; }
+
+function atualizarPainel() {
+  atualizarConexao();
+  $('#painelVazio').hidden = !!E.cfg || lig.estado === 'sembt';
+  $('#avisoSemBtVazio').hidden = !!E.cfg;
+  if (!E.cfg) { $('#btnChuva').hidden = true; return; }
+  const agora = agoraEp();
+  const tz = tzAtual();
+  const on = conectado() && E.st;
+  const senPulso = E.cfg.sen.some((x) => x.en && x.sa === -2);
+  $$('#cartoesSaidas .saida').forEach((card) => {
+    const i = Number(card.dataset.i);
+    const valv = ehValvula(i);
+    const sc = E.cfg.s[i];
+    const s = on ? E.st.s[i] || {} : null;
+    const palavra = $('.palavra', card), porque = $('.porque', card), proxima = $('.proxima-txt', card), det = $('.detalhes', card);
+    let estadoOn = 'x', tipo = '', icPorque = 'calendario', txtPorque = '';
+    const manual = s && s.ma > agora, pausada = s && s.pa > agora, bloq = s && s.b;
+    if (!s) {
+      definirTexto(palavra, 'Sem ligação');
+      trocarIcone($('.estado-ic', card), 'bt');
+      txtPorque = 'Conecte para ver e comandar';
+      icPorque = 'info';
+    } else {
+      estadoOn = s.on ? '1' : '0';
+      definirTexto(palavra, valv ? (s.on ? 'Aberta' : 'Fechada') : (s.on ? 'Ligada' : 'Desligada'));
+      trocarIcone($('.estado-ic', card), valv ? (s.on ? 'gota' : 'gotaFechada') : 'energia');
+      if (bloq) { tipo = 'bloq'; icPorque = 'alerta'; txtPorque = 'Bloqueada: corrente alta'; }
+      else if (manual) { icPorque = 'mao'; txtPorque = 'Manual até ' + quando(s.ma, agora); }
+      else if (pausada) { icPorque = 'pausa'; txtPorque = 'Pausada até ' + quando(s.pa, agora); }
+      else if (!E.st.hv) { tipo = 'semhora'; icPorque = 'alerta'; txtPorque = 'Sem hora certa: o programa não liga nada'; }
+      else { icPorque = 'calendario'; txtPorque = 'Pelo programa'; }
+    }
+    card.dataset.on = estadoOn;
+    card.dataset.bloq = bloq ? '1' : '0';
+    porque.dataset.tipo = tipo;
+    trocarIcone($('.porque-ic', card), icPorque);
+    definirTexto($('.porque-txt', card), txtPorque);
+    // próxima mudança
+    let txtProx;
+    if (bloq) txtProx = 'Fica desligada até liberar';
+    else {
+      const pm = proximaEfetiva(i, agora);
+      const temRegras = sc.r.some((r) => r.en && r.w);
+      if (pm) txtProx = verbo(i, pm.on, false) + ' ' + quandoAs(pm.ep, agora);
+      else if (s && !E.st.hv && !manual) txtProx = 'Acerte a hora conectando o app';
+      else txtProx = temRegras ? 'Nada muda nos próximos 8 dias' : 'Sem programa';
+    }
+    definirTexto(proxima, txtProx);
+    // detalhes
+    const partes = [];
+    if (s) partes.push('Hoje: ' + fmtDuracao(num(s.hj, 0) / 60));
+    if (s && valv && senPulso) partes.push('Último pulso: ' + (num(s.pk, -1) >= 0 ? fmtA(s.pk) : '—'));
+    definirTexto(det, partes.join(' · '));
+    det.hidden = !partes.length;
+    // botões
+    const pode = !!on;
+    $$('button[data-acao]', card).forEach((b) => { if (!b.hasAttribute('aria-busy')) b.disabled = !pode; });
+    $('[data-acao="programa"]', card).hidden = !manual;
+    $('[data-acao="liberar"]', card).hidden = !bloq;
+    $('[data-acao="pausar"]', card).hidden = !!pausada;
+    $('[data-acao="cancelarPausa"]', card).hidden = !pausada;
+  });
+  // botão da chuva
+  const chuva = $('#btnChuva');
+  const vs = valvulasAtivas();
+  chuva.hidden = !vs.length;
+  if (vs.length) {
+    const pausadas = on ? vs.filter((i) => E.st.s[i] && E.st.s[i].pa > agora) : [];
+    let html;
+    if (pausadas.length === vs.length) {
+      const ate = Math.min.apply(null, pausadas.map((i) => E.st.s[i].pa));
+      html = ['pausa', 'Cancelar pausa da rega', 'Rega pausada até ' + quando(ate, agora)];
+    } else {
+      html = ['chuva', 'Pausar a rega (chuva)', vs.length > 1 ? 'Pausa as duas válvulas' : 'Pausa a válvula'];
+    }
+    if (chuva.dataset.chave !== html.join('|')) {
+      chuva.dataset.chave = html.join('|');
+      chuva.replaceChildren(icone(html[0]), h('span', null, html[1], h('small', { text: html[2] })));
+    }
+    chuva.disabled = !on;
+  }
+}
+
+function atualizarConexao() {
+  const est = lig.estado;
+  const cx = $('#cartaoConexao');
+  cx.hidden = est === 'sembt' && !E.ctrl;
+  cx.dataset.estado = est;
+  $('#cxPonto').parentElement.dataset.estado = est;
+  const titulos = {
+    desligado: 'Desconectado', procurando: 'Procurando o controlador…', conectando: 'Conectando…', pin: 'Esperando o PIN',
+    conectado: 'Conectado', semsinal: 'Sem sinal', reconectando: 'Reconectando…', sembt: 'Sem Bluetooth'
+  };
+  definirTexto($('#cxEstado'), titulos[est] || est);
+  let det = lig.detalhe;
+  const trava = segundosTrava();
+  if (est === 'desligado' && trava > 0) det = textoTrava();
+  if (!det) {
+    if (est === 'desligado') det = E.ctrl ? 'Toque em Conectar para falar com ' + (E.ctrl.nome || 'o controlador') + '.' : 'Toque em Conectar e escolha o controlador na lista.';
+    else if (est === 'semsinal') det = 'Há mais de 3 s sem notícias. Chegue mais perto.';
+    else if (est === 'conectado') det = '';
+    else if (est === 'sembt') det = 'Mostrando o que ficou guardado neste celular.';
+  }
+  if (est === 'reconectando' && lig.proximaTentativa > Date.now()) {
+    det = 'Nova tentativa em ' + Math.ceil((lig.proximaTentativa - Date.now()) / 1000) + ' s.';
+  }
+  definirTexto($('#cxDetalhe'), det);
+  $('#cxDetalhe').hidden = !det;
+  // informações do controlador
+  const temInfo = !!E.ctrl;
+  $('#cxInfo').hidden = !temInfo;
+  if (temInfo) {
+    definirTexto($('#cxNome'), (E.cfg && E.cfg.nome) || E.ctrl.nome || '—');
+    const st = conectado() ? E.st : null;
+    if (st) {
+      const d = dataLocal(agoraEp());
+      const fuso = tzAtual() !== fusoCelular() ? ' (' + fmtFuso(tzAtual()) + ')' : '';
+      definirTexto($('#cxRelogio'), st.hv ? DIAS_CURTOS[d.getUTCDay()] + ' ' + pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + ' · ' + hhmmEp(agoraEp()) + fuso : '—');
+      const hora = $('#cxHora');
+      const chave = (st.hv ? 1 : 0) + '' + (st.rtc ? 1 : 0);
+      if (hora.dataset.chave !== chave) {
+        hora.dataset.chave = chave;
+        hora.replaceChildren(
+          st.hv ? h('span', { class: 'selo selo-ok' }, icone('ok'), 'Hora certa') : h('span', { class: 'selo selo-aviso' }, icone('alerta'), 'Sem hora certa'), ' ',
+          st.rtc ? h('span', { class: 'selo selo-neutro' }, 'Com relógio DS3231') : h('span', { class: 'selo selo-neutro' }, 'Sem relógio DS3231'));
+      }
+      const up = Math.max(0, num(st.up, 0));
+      definirTexto($('#cxUp'), up < 3600 ? Math.floor(up / 60) + ' min' : up < 86400 ? Math.floor(up / 3600) + ' h ' + Math.floor((up % 3600) / 60) + ' min' : Math.floor(up / 86400) + ' dias');
+    } else {
+      definirTexto($('#cxRelogio'), '—');
+      const hora = $('#cxHora');
+      if (hora.dataset.chave !== '-') { hora.dataset.chave = '-'; hora.textContent = '—'; }
+      definirTexto($('#cxUp'), '—');
+    }
+  }
+  const ocupado = est === 'conectando' || est === 'pin';
+  const ligadoOuTentando = conectado() || est === 'reconectando' || est === 'procurando' || ocupado;
+  $('#btnConectar').hidden = ligadoOuTentando || est === 'sembt';
+  $('#btnConectar').disabled = trava > 0;
+  $('#btnDesconectar').hidden = !ligadoOuTentando;
+  definirTexto($('#btnDesconectar'), conectado() ? 'Desconectar' : 'Parar');
+  definirTexto($('#topoNome'), (E.cfg && E.cfg.nome) || (E.ctrl && E.ctrl.nome) || 'Rega e hidroponia');
+  $('#versaoFw').textContent = E.ctrl && E.ctrl.fw ? ' · controlador ' + E.ctrl.fw : '';
+  atualizarBarra();
+}
+
+function renderAlarmes() {
+  const caixa = $('#alarmes');
+  // E.eventos está em ordem do controlador (mais velho primeiro); invertido = mais novo primeiro,
+  // mesmo entre eventos do mesmo segundo (ex.: "corrente alta" e logo depois "bloqueada")
+  const vistos = E.alarmesVistos;
+  const novos = E.eventos.filter((e) => e[2] >= 20 && e[2] <= 23 && e[0] > 0 &&
+    (e[0] > vistos.ep || (e[0] === vistos.ep && !vistos.ch.includes(chaveEv(e))))).reverse();
+  $('#navAlarme').hidden = !novos.length;
+  caixa.replaceChildren();
+  if (!novos.length) return;
+  const agora = agoraEp();
+  const lista = h('ul');
+  novos.slice(0, 3).forEach((e) => lista.append(h('li', null, h('span', { class: 'mono', text: quando(e[0], agora) }), fraseEvento(e).replace(/^Alarme: /, ''))));
+  if (novos.length > 3) lista.append(h('li', { class: 'mudo', text: 'e mais ' + (novos.length - 3) + ' no Histórico.' }));
+  caixa.append(h('div', { class: 'alerta alerta-perigo', role: 'alert' },
+    icone('alerta'),
+    h('div', { class: 'alerta-corpo' }, h('h2', { text: novos.length > 1 ? 'Alarmes' : 'Alarme' }), lista,
+      h('div', { class: 'acoes-linha' }, h('button', { type: 'button', class: 'btn', id: 'btnAlarmesOk', onclick: () => {
+        const ep = Math.max.apply(null, novos.map((e) => e[0]));
+        const ch = (ep === vistos.ep ? vistos.ch : []).concat(novos.filter((e) => e[0] === ep).map(chaveEv));
+        E.alarmesVistos = { ep: ep, ch: ch };
+        gravar('alarmesVistos', E.alarmesVistos);
+        renderAlarmes();
+      } }, icone('ok'), 'Entendi')))));
+}
+
+// =====================================================================
+// CORRENTE (gráficos)
+// =====================================================================
+const graficos = [];
+let desenhoPedido = false;
+function pedirDesenho() {
+  if (desenhoPedido) return;
+  desenhoPedido = true;
+  requestAnimationFrame(() => { desenhoPedido = false; desenharGraficos(); });
+}
+function cores() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (n) => cs.getPropertyValue(n).trim();
+  return { serie: [v('--serie-1'), v('--serie-2')], grade: v('--grade'), eixo: v('--eixo'), texto: v('--texto'), sup: v('--sup'), cruz: v('--borda-forte') };
+}
+// Escala do eixo y: de "base" (0, ou abaixo de 0 se houver corrente negativa) até "topo".
+function escalaY(max, min) {
+  max = Math.max(0, max); min = Math.min(0, min || 0);
+  const alvo = Math.max((max - min) * 1.15, 0.5);
+  const passos = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100];
+  const p = passos.find((x) => alvo / x <= 4) || 100;
+  if (min === 0) return { base: 0, topo: Math.ceil(alvo / p - 1e-9) * p, passo: p };
+  const base = -Math.ceil((-min * 1.15) / p - 1e-9) * p;
+  return { base: base, topo: Math.max(Math.ceil((max * 1.15) / p - 1e-9) * p, base + Math.ceil(alvo / p - 1e-9) * p), passo: p };
+}
+function fmtTick(v, passo) {
+  const casas = passo >= 1 ? 0 : passo >= 0.5 || passo === 0.1 || passo === 0.2 ? 1 : 2;
+  return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas }).format(v);
+}
+
+class Grafico {
+  constructor(j, caixa) {
+    this.j = j;
+    this.canvas = h('canvas', { tabindex: '0', role: 'img', 'aria-label': 'Gráfico da corrente dos últimos 3 minutos' });
+    this.dica = h('div', { class: 'dica-graf', hidden: true });
+    caixa.append(this.canvas, this.dica);
+    this.cursorX = null;
+    this.cursorIdx = null;
+    this.timerSome = null;
+    const c = this.canvas;
+    const mover = (e) => {
+      const r = c.getBoundingClientRect();
+      this.cursorX = e.clientX - r.left;
+      this.cursorIdx = null;
+      clearTimeout(this.timerSome);
+      this.desenhar();
+    };
+    c.addEventListener('pointerdown', mover);
+    c.addEventListener('pointermove', mover);
+    c.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') this.esconder(); });
+    c.addEventListener('pointercancel', () => this.esconder());
+    c.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') { this.timerSome = setTimeout(() => this.esconder(), 2500); } });
+    c.addEventListener('keydown', (e) => {
+      const pts = this.pontos || [];
+      if (!pts.length) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        let k = this.cursorIdx === null ? pts.length - 1 : this.cursorIdx;
+        k += e.key === 'ArrowLeft' ? -4 : 4;
+        this.cursorIdx = Math.max(0, Math.min(pts.length - 1, k));
+        this.cursorX = pts[this.cursorIdx].x;
+        this.desenhar();
+      } else if (e.key === 'Escape') this.esconder();
+    });
+    c.addEventListener('blur', () => { if (this.cursorIdx !== null) this.esconder(); });
+  }
+  esconder() { this.cursorX = null; this.cursorIdx = null; this.dica.hidden = true; this.desenhar(); }
+  desenhar() {
+    const c = this.canvas, j = this.j;
+    const larg = c.clientWidth, alt = c.clientHeight;
+    if (!larg || !alt) return;
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    if (c.width !== Math.round(larg * dpr) || c.height !== Math.round(alt * dpr)) {
+      c.width = Math.round(larg * dpr); c.height = Math.round(alt * dpr);
+    }
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, larg, alt);
+    const cor = cores();
+    const agoraMs = Date.now();
+    const ini = agoraMs - JANELA_MS;
+    const dados = E.amostras.filter((a) => a.t >= ini && a.v[j] !== null && a.v[j] !== undefined);
+    let max = 0, min = 0;
+    for (const a of dados) { if (a.v[j] > max) max = a.v[j]; if (a.v[j] < min) min = a.v[j]; }
+    const esc = escalaY(max, min);
+    const ticks = [];
+    for (let k = 0; esc.base + k * esc.passo <= esc.topo + 1e-9; k++) ticks.push(esc.base + k * esc.passo);
+    ctx.font = '500 12px ' + getComputedStyle(document.body).fontFamily;
+    let largEixo = 0;
+    for (const v of ticks) largEixo = Math.max(largEixo, ctx.measureText(fmtTick(v, esc.passo)).width);
+    const L = Math.ceil(largEixo) + 8, R = 58, T = 10, B = 24;
+    const pw = larg - L - R, ph = alt - T - B;
+    const xDe = (t) => L + ((t - ini) / JANELA_MS) * pw;
+    const yDe = (v) => T + ph - ((Math.min(esc.topo, Math.max(esc.base, v)) - esc.base) / (esc.topo - esc.base)) * ph;
+    // grade e eixo y
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = cor.grade;
+    ctx.fillStyle = cor.eixo;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (const v of ticks) {
+      const y = Math.round(yDe(v)) + 0.5;
+      ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke();
+      ctx.fillText(fmtTick(v, esc.passo), L - 6, y);
+    }
+    // eixo x
+    ctx.textBaseline = 'top';
+    // primeiro e último sempre; os do meio só se couberem sem encostar
+    const rotulos = [[0, 'há 3 min'], [JANELA_MS, 'agora'], [120000, 'há 1 min'], [60000, 'há 2 min']];
+    const ocupados = [];
+    rotulos.forEach(([dt, txt], k) => {
+      const x = xDe(ini + dt), w = ctx.measureText(txt).width;
+      const a = k === 0 ? x : k === 1 ? x - w : x - w / 2;
+      if (ocupados.some(([o1, o2]) => a < o2 + 10 && a + w > o1 - 10)) return;
+      ocupados.push([a, a + w]);
+      ctx.textAlign = 'left';
+      ctx.fillText(txt, a, T + ph + 7);
+    });
+    // série (quebra a linha em buracos > 1,5 s)
+    const pts = dados.map((a) => ({ x: xDe(a.t), y: yDe(a.v[j]), v: a.v[j], t: a.t }));
+    this.pontos = pts;
+    const trechos = [];
+    let atual = [];
+    for (let k = 0; k < pts.length; k++) {
+      if (k && dados[k].t - dados[k - 1].t > 1500) { trechos.push(atual); atual = []; }
+      atual.push(pts[k]);
+    }
+    if (atual.length) trechos.push(atual);
+    const corSerie = cor.serie[j];
+    for (const tr of trechos) {
+      if (!tr.length) continue;
+      // área a 10%
+      ctx.beginPath();
+      ctx.moveTo(tr[0].x, yDe(0));
+      tr.forEach((p) => ctx.lineTo(p.x, p.y));
+      ctx.lineTo(tr[tr.length - 1].x, yDe(0));
+      ctx.closePath();
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = corSerie;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      // linha 2 px
+      ctx.beginPath();
+      tr.forEach((p, k) => (k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+      if (tr.length === 1) ctx.lineTo(tr[0].x + 0.1, tr[0].y);
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = corSerie;
+      ctx.stroke();
+    }
+    // ponto e valor no fim da linha
+    if (pts.length) {
+      const u = pts[pts.length - 1];
+      this.ponto(ctx, u.x, u.y, corSerie, cor.sup);
+      ctx.fillStyle = cor.texto;
+      ctx.font = '600 13px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(fmtA(u.v), u.x + 9, Math.max(T + 7, Math.min(T + ph - 7, u.y)));
+    } else {
+      ctx.fillStyle = cor.eixo;
+      ctx.font = '500 15px ' + getComputedStyle(document.body).fontFamily;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(conectado() ? 'Esperando leituras…' : 'Sem leituras (conecte ao controlador)', L + pw / 2, T + ph / 2);
+    }
+    // cruz que gruda na leitura mais perto
+    if (this.cursorX !== null && pts.length) {
+      let k = this.cursorIdx;
+      if (k === null) {
+        let melhor = Infinity; k = 0;
+        for (let q = 0; q < pts.length; q++) { const d = Math.abs(pts[q].x - this.cursorX); if (d < melhor) { melhor = d; k = q; } }
+      }
+      const p = pts[Math.min(k, pts.length - 1)];
+      ctx.strokeStyle = cor.cruz;
+      ctx.lineWidth = 1;
+      const x = Math.round(p.x) + 0.5;
+      ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, T + ph); ctx.stroke();
+      this.ponto(ctx, p.x, p.y, corSerie, cor.sup);
+      this.dica.replaceChildren(h('strong', { text: fmtA(p.v) }), h('span', { text: hhmmssEp(p.t / 1000) }));
+      this.dica.hidden = false;
+      const ld = this.dica.offsetWidth || 90;
+      const xc = Math.max(ld / 2, Math.min(larg - ld / 2, p.x));
+      this.dica.style.left = xc + 'px';
+      this.dica.style.top = (p.y - T < 56 && p.y < ph / 2 + T ? T + ph - 52 : 2) + 'px';
+    } else {
+      this.dica.hidden = true;
+    }
+    // resumo em texto (os valores não dependem do toque)
+    return dados;
+  }
+  ponto(ctx, x, y, corSerie, corSup) {
+    ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fillStyle = corSup; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fillStyle = corSerie; ctx.fill();
+  }
+}
+
+function renderCorrente() {
+  const caixa = $('#sensores');
+  caixa.replaceChildren();
+  graficos.length = 0;
+  if (!E.cfg) {
+    caixa.append(vazioSemCfg('Conecte ao controlador para ver a corrente.'));
+    $('#cartaoZerar').hidden = true;
+    return;
+  }
+  const ativos = [0, 1].filter((j) => E.cfg.sen[j].en);
+  $('#cartaoZerar').hidden = !ativos.length;
+  if (!ativos.length) {
+    caixa.append(h('div', { class: 'cartao vazio' }, icone('pulso'), h('h2', { text: 'Nenhum sensor ativo' }),
+      h('p', { text: 'Ative um sensor de corrente em Ajustes › Sensores.' }),
+      h('button', { type: 'button', class: 'btn', onclick: () => mostrarAba('ajustes') }, 'Abrir Ajustes')));
+    return;
+  }
+  ativos.forEach((j) => {
+    const x = E.cfg.sen[j];
+    const tit = novoId('sen');
+    const vigia = x.sa === -2 ? 'Pulso das válvulas' : x.sa >= 0 ? 'Vigia ' + nomeSaida(x.sa) : 'Só mostra';
+    const graf = h('div', { class: 'grafico' });
+    const card = h('section', { class: 'cartao sensor', dataset: { j: j }, 'aria-labelledby': tit },
+      h('div', { class: 'sensor-cab' },
+        h('div', { style: 'min-width:0' }, h('h2', { id: tit, text: x.n || 'Sensor ' + (j + 1) }),
+          h('p', { class: 'sensor-sub', text: 'Sensor ' + (j + 1) + ' (GPIO ' + (j ? 35 : 34) + ') · ' + (x.tp === 'ac' ? 'AC' : 'DC') + ' · ' + vigia })),
+        h('div', { class: 'numero', 'aria-live': 'off' }, h('span', { class: 'num-v', text: '—' }), h('small', { text: 'A' }))),
+      graf,
+      h('p', { class: 'resumo-graf', 'aria-live': 'off' }),
+      h('p', { class: 'dica dica-negativa', dataset: { tipo: 'aviso' }, hidden: true, text: 'Corrente negativa: o sensor está ligado ao contrário. Os alarmes funcionam igual; para ver o número positivo, troque de lugar os dois fios da carga no sensor (IP+ e IP−).' }),
+      x.sa === -2 ? h('div', { class: 'picos-cx' }) : null);
+    caixa.append(card);
+    graficos[j] = new Grafico(j, graf);
+  });
+  atualizarPicos();
+  desenharGraficos();
+}
+
+function desenharGraficos() {
+  if (E.aba !== 'corrente') return;
+  graficos.forEach((g, j) => {
+    if (!g) return;
+    const dados = g.desenhar() || [];
+    const card = g.canvas.closest('.sensor');
+    const v = E.ultimaI[j];
+    definirTexto($('.num-v', card), conectado() && v !== null && v !== undefined ? fmt2.format(v) : '—');
+    const resumo = $('.resumo-graf', card);
+    if (dados.length) {
+      let mn = Infinity, mx = -Infinity, soma = 0;
+      for (const a of dados) { const x = a.v[j]; if (x < mn) mn = x; if (x > mx) mx = x; soma += x; }
+      $('.dica-negativa', card).hidden = !(mn < 0);
+      const chave = [mn, mx, soma / dados.length].map((x) => fmt2.format(x)).join('|');
+      if (resumo.dataset.chave !== chave) {
+        resumo.dataset.chave = chave;
+        const par = (rot, v) => h('span', { class: 'par' }, rot + ' ', h('b', { text: fmtA(v) }));
+        resumo.replaceChildren('Últimos 3 min: ', par('mínimo', mn), ' · ', par('média', soma / dados.length), ' · ', par('máximo', mx));
+        g.canvas.setAttribute('aria-label', 'Corrente de ' + (E.cfg.sen[j].n || 'sensor ' + (j + 1)) + ' nos últimos 3 minutos: mínimo ' + fmtA(mn) + ', média ' + fmtA(soma / dados.length) + ', máximo ' + fmtA(mx) + '.');
+      }
+    } else if (resumo.dataset.chave !== '-') {
+      resumo.dataset.chave = '-';
+      resumo.textContent = 'Últimos 3 min: sem leituras.';
+    }
+  });
+}
+
+function atualizarPicos() {
+  const cx = $('.picos-cx');
+  if (!cx || !E.cfg) return;
+  const agora = agoraEp();
+  const itens = [];
+  [0, 1].forEach((i) => {
+    if (!E.cfg.s[i].en) return;
+    const ultimos = E.eventos.filter((e) => e[1] === i && (e[2] === 1 || e[2] === 2 || e[2] === 20) && e[4] > 0 && e[0] > 0).slice(-3).reverse();
+    const s = conectado() && E.st ? E.st.s[i] : null;
+    const pk = s && num(s.pk, -1) >= 0 ? fmtA(s.pk) : '—';
+    itens.push(h('li', null, h('span', { text: nomeSaida(i) }),
+      h('span', { class: 'picos-v' }, h('b', { text: pk }),
+        ultimos.length ? h('small', { class: 'mudo', text: 'Recentes: ' + ultimos.map((e) => quando(e[0], agora) + ' ' + (e[2] === 1 ? 'abriu' : e[2] === 2 ? 'fechou' : 'fraco') + ' ' + fmtA(e[4])).join(' · ') }) : null)));
+  });
+  cx.replaceChildren(h('h3', { class: 'campo-rot', style: 'margin-top:12px', text: 'Pico do último pulso' }), h('ul', { class: 'picos' }, itens));
+}
+
+async function acaoZerar(botao) {
+  const erro = $('#zerarErro');
+  erro.hidden = true;
+  if (!conectado()) { aviso('Conecte ao controlador primeiro.'); return; }
+  botao.disabled = true;
+  try {
+    await pedir({ t: 'zero' }, 'ok');
+    aviso('Sensores zerados.', 'ok');
+  } catch (e) {
+    erro.replaceChildren(icone('alerta'), h('span', { text: e.message }));
+    erro.hidden = false;
+  } finally {
+    botao.disabled = false;
+  }
+}
+
+// =====================================================================
+// PROGRAMAS
+// =====================================================================
+const LIM = {
+  h: [0, 1439], d: [1, 1440], a: [0, 1439], b: [0, 1439], on: [1, 1440], off: [0, 1440],
+  pms: [10, 1000], mva: [1, 2000], div: [0.05, 1], aj: [0.5, 2], min: [0, 100], max: [0, 100]
+};
+function textoDias(w) {
+  if (w === 127) return 'todos os dias';
+  if (w === 0) return 'nenhum dia';
+  if (w === 62) return 'seg a sex';
+  if (w === 65) return 'sáb e dom';
+  if (w === 126) return 'seg a sáb';
+  const l = [];
+  for (let d = 0; d < 7; d++) if (w & (1 << d)) l.push(DIAS_CURTOS[d]);
+  return l.join(', ');
+}
+function resumoRegra(i, r) {
+  const liga = ehValvula(i) ? 'Abre' : 'Liga';
+  if (r.k === 'f') return liga + ' ' + hhmm(r.h) + ' por ' + fmtDuracao(r.d) + ' · ' + textoDias(r.w);
+  const jan = r.a === r.b ? 'O dia todo (a partir das ' + hhmm(r.a) + ')' : 'Das ' + hhmm(r.a) + ' às ' + hhmm(r.b);
+  const ciclo = r.off === 0 ? 'ligado direto' : (ehValvula(i) ? 'aberta ' : 'liga ') + r.on + ' min, ' + (ehValvula(i) ? 'fechada ' : 'desliga ') + r.off + ' min';
+  return jan + ': ' + ciclo + ' · ' + textoDias(r.w);
+}
+function dicaRegra(r) {
+  const l = [];
+  if (r.w === 0) l.push(['aviso', 'Escolha pelo menos um dia. Sem dia, a regra não liga.']);
+  if (r.k === 'f' && r.h + r.d > 1440) l.push(['', 'Termina às ' + hhmm(r.h + r.d) + ' do dia seguinte.']);
+  if (r.k === 'c') {
+    let len = (r.b - r.a + 1440) % 1440; if (len === 0) len = 1440;
+    if (r.a === r.b) l.push(['', 'Janela de 24 horas.']);
+    else if (r.b < r.a) l.push(['', 'A janela passa da meia-noite (termina às ' + hhmm(r.b) + ' do dia seguinte).']);
+    if (r.off > 0 && r.on + r.off > len) l.push(['', 'O ciclo é maior que a janela: liga só uma vez.']);
+  }
+  return l;
+}
+
+function vazioSemCfg(texto) {
+  return h('div', { class: 'cartao vazio' }, icone('bt'), h('h2', { text: 'Ainda sem dados do controlador' }),
+    h('p', { text: texto }),
+    navigator.bluetooth ? h('button', { type: 'button', class: 'btn btn-pri', onclick: () => { mostrarAba('painel'); botaoConectar(); } }, 'Conectar') : null);
+}
+
+function renderProgramas() {
+  const vazio = $('#progVazio'), corpo = $('#progCorpo');
+  if (!E.rascunho) {
+    vazio.replaceChildren(vazioSemCfg('Conecte uma vez para carregar os programas. Depois dá para ver e mexer mesmo sem ligação.'));
+    corpo.hidden = true;
+    return;
+  }
+  vazio.replaceChildren();
+  corpo.hidden = false;
+  const R = E.rascunho;
+  const sel = $('#progSaidas');
+  sel.replaceChildren();
+  R.s.forEach((s, i) => {
+    sel.append(h('button', { type: 'button', 'aria-pressed': i === E.saidaProg ? 'true' : 'false', onclick: () => { E.saidaProg = i; gravar('saidaProg', i); renderProgramas(); } },
+      s.n || NOMES_PADRAO[i], s.en ? null : h('span', { class: 'sub', text: 'desativada' })));
+  });
+  const i = E.saidaProg;
+  const regras = R.s[i].r;
+  const lista = $('#progRegras');
+  lista.replaceChildren();
+  if (!regras.length) {
+    lista.append(h('div', { class: 'cartao' }, h('p', { class: 'texto-ajuda', style: 'margin:0', text: 'Nenhuma regra: ' + (R.s[i].n || NOMES_PADRAO[i]) + ' não liga sozinha. Use “+ Horário” para um horário fixo ou “+ Ciclo” para liga/desliga repetido (hidroponia).' })));
+  }
+  regras.forEach((r, k) => lista.append(cartaoRegra(i, k)));
+  definirTexto($('#progRegrasTit'), 'Regras de ' + (R.s[i].n || NOMES_PADRAO[i]) + ' (' + regras.length + ' de 8)');
+  const cheio = regras.length >= 8;
+  $('#btnAddFixo').disabled = cheio;
+  $('#btnAddCiclo').disabled = cheio;
+  $('#progLimite').hidden = !cheio;
+  $('#progModelo').hidden = ehValvula(i);
+  atualizarVisoesProg();
+}
+
+function cartaoRegra(i, k) {
+  const r = E.rascunho.s[i].r[k];
+  const card = h('div', { class: 'cartao regra', dataset: { k: k, en: r.en ? '1' : '0' } });
+  const resumo = h('p', { class: 'regra-resumo' });
+  const dicas = h('div', { class: 'regra-dicas', 'aria-live': 'polite' });
+  const atualizarCartao = () => {
+    card.dataset.en = r.en ? '1' : '0';
+    resumo.textContent = resumoRegra(i, r);
+    dicas.replaceChildren(...dicaRegra(r).map(([tipo, t]) => h('p', { class: 'dica', dataset: { tipo: tipo }, text: t })));
+  };
+  const mudou = () => { atualizarCartao(); alterouRascunho(); atualizarVisoesProg(); };
+  const sw = interruptor('Ativa', null, !!r.en, (v) => { r.en = v ? 1 : 0; mudou(); });
+  sw.classList.add('regra-sw');
+  card.append(h('div', { class: 'regra-topo' },
+    h('span', { class: 'regra-tipo' }, icone(r.k === 'f' ? 'relogio' : 'ciclo'), r.k === 'f' ? 'Horário fixo' : 'Ciclo'),
+    sw,
+    h('button', { type: 'button', class: 'btn-icone', 'aria-label': 'Apagar esta regra', title: 'Apagar', onclick: async () => {
+      const ok = await confirmar('Apagar esta regra?', resumoRegra(i, r), 'Apagar', true);
+      if (!ok) return;
+      E.rascunho.s[i].r.splice(k, 1);
+      alterouRascunho();
+      renderProgramas();
+    } }, icone('lixo'))), resumo);
+  // dias
+  const dias = h('div', { class: 'dias', role: 'group', 'aria-label': 'Dias da semana' });
+  for (let d = 0; d < 7; d++) {
+    const b = h('button', { type: 'button', 'aria-pressed': r.w & (1 << d) ? 'true' : 'false', 'aria-label': DIAS_LONGOS[d], title: DIAS_LONGOS[d], text: DIAS_LETRA[d] });
+    b.addEventListener('click', () => {
+      r.w ^= 1 << d;
+      b.setAttribute('aria-pressed', r.w & (1 << d) ? 'true' : 'false');
+      mudou();
+    });
+    dias.append(b);
+  }
+  card.append(dias);
+  // campos
+  const grade = h('div', { class: 'grade-2' });
+  if (r.k === 'f') {
+    grade.append(campoHora('Início', r, 'h', mudou), campoInteiro('Duração', r, 'd', 'min', mudou));
+  } else {
+    grade.append(campoHora('Das', r, 'a', mudou), campoHora('Às', r, 'b', mudou),
+      campoInteiro('Liga', r, 'on', 'min', mudou), campoInteiro('Desliga', r, 'off', 'min', mudou));
+  }
+  card.append(grade, dicas);
+  atualizarCartao();
+  return card;
+}
+
+function campoHora(rotulo, obj, campo, aoMudar) {
+  const id = novoId('hora');
+  const dica = h('p', { class: 'dica', id: id + 'd', hidden: true, role: 'status' });
+  const ent = h('input', { id: id, class: 'entrada entrada-hora', type: 'time', step: '60', value: hhmm(obj[campo]), required: true, 'aria-describedby': id + 'd' });
+  ent.addEventListener('change', () => {
+    const v = lerHhmm(ent.value);
+    if (!isFinite(v)) {
+      ent.value = hhmm(obj[campo]);
+      dica.textContent = 'Hora inválida. Use hh:mm.'; dica.dataset.tipo = 'erro'; dica.hidden = false;
+      return;
+    }
+    dica.hidden = true;
+    obj[campo] = Math.min(LIM[campo][1], Math.max(LIM[campo][0], v));
+    aoMudar();
+  });
+  return h('label', { class: 'campo', for: id }, h('span', { text: rotulo }), ent, dica);
+}
+// número com limite (§9): corta para o limite e avisa
+function campoNumero(rotulo, obj, campo, unid, casas, aoMudar, ajuda) {
+  const id = novoId('num');
+  const lim = LIM[campo];
+  const dica = h('p', { class: 'dica', id: id + 'd', role: 'status', text: ajuda || '', hidden: !ajuda });
+  const ent = h('input', { id: id, class: 'entrada', type: 'text', inputmode: casas ? 'decimal' : 'numeric', autocomplete: 'off', value: fmtDec(obj[campo], casas || 0), 'aria-describedby': id + 'd' });
+  const mostrar = (txt, tipo) => { dica.textContent = txt; dica.dataset.tipo = tipo || ''; dica.hidden = !txt; };
+  ent.addEventListener('input', () => {
+    const v = lerDec(ent.value);
+    if (ent.value.trim() === '' || !isFinite(v)) { ent.setAttribute('aria-invalid', 'true'); mostrar('Digite um número.', 'erro'); }
+    else if (v < lim[0] || v > lim[1]) { ent.setAttribute('aria-invalid', 'true'); mostrar('Use de ' + fmtDec(lim[0], 3) + ' a ' + fmtDec(lim[1], 3) + (unid ? ' ' + unid : '') + '.', 'erro'); }
+    else { ent.removeAttribute('aria-invalid'); mostrar(ajuda || ''); }
+  });
+  ent.addEventListener('change', () => {
+    let v = lerDec(ent.value);
+    ent.removeAttribute('aria-invalid');
+    if (!isFinite(v)) {
+      ent.value = fmtDec(obj[campo], casas || 0);
+      mostrar('Valor inválido: voltou para ' + ent.value + '.', 'aviso');
+      return;
+    }
+    const f = Math.pow(10, casas || 0);
+    v = Math.round(v * f) / f;
+    let txt = ajuda || '', tipo = '';
+    if (v < lim[0]) { v = lim[0]; txt = 'Ajustado para ' + fmtDec(v, 3) + ' (mínimo).'; tipo = 'aviso'; }
+    if (v > lim[1]) { v = lim[1]; txt = 'Ajustado para ' + fmtDec(v, 3) + ' (máximo).'; tipo = 'aviso'; }
+    obj[campo] = v;
+    ent.value = fmtDec(v, casas || 0);
+    mostrar(txt, tipo);
+    aoMudar(v);
+  });
+  return h('label', { class: 'campo', for: id }, h('span', null, rotulo, unid ? h('span', { class: 'so-leitor', text: ' (' + unid + ')' }) : null),
+    unid ? h('div', { class: 'entrada-unid' }, ent, h('em', { 'aria-hidden': 'true', text: unid })) : ent, dica);
+}
+function campoInteiro(rotulo, obj, campo, unid, aoMudar, ajuda) { return campoNumero(rotulo, obj, campo, unid, 0, aoMudar, ajuda); }
+
+function interruptor(titulo, sub, marcado, aoMudar, desabilitado) {
+  const ent = h('input', { type: 'checkbox', role: 'switch' });
+  ent.checked = !!marcado;
+  ent.disabled = !!desabilitado;
+  ent.addEventListener('change', () => aoMudar(ent.checked));
+  return h('label', { class: 'interruptor' }, ent, h('span', { class: 'trilho', 'aria-hidden': 'true' }),
+    h('span', { class: 'interruptor-txt' }, h('strong', { text: titulo }), sub ? h('small', { text: sub }) : null));
+}
+
+let timerVisoes = null;
+function atualizarVisoesProg() {
+  clearTimeout(timerVisoes);
+  timerVisoes = setTimeout(desenharVisoesProg, 30);
+}
+function barraBlocos(blocos, el) {
+  el.replaceChildren(h('div', { class: 'miolo' }, blocos.map(([a, b]) => h('span', { class: 'bloco', style: 'left:' + (a / 14.4) + '%;width:' + ((b - a) / 14.4) + '%' }))));
+}
+function desenharVisoesProg() {
+  if (!E.rascunho || E.aba !== 'programas') return;
+  const i = E.saidaProg;
+  const sc = E.rascunho.s[i];
+  const regras = sc.r;
+  const agora = agoraEp();
+  const hojeD = diaDe(agora);
+  const minAgora = Math.floor((localDe(agora) - hojeD * 86400) / 60);
+  // hoje
+  const blocos = Agenda.blocosDoDia(regras, hojeD);
+  const hoje = $('#progHoje');
+  barraBlocos(blocos, hoje);
+  hoje.append(h('span', { class: 'agora-marca', style: 'left:' + (minAgora / 14.4) + '%', title: 'agora ' + hhmm(minAgora) }));
+  const total = blocos.reduce((s, b) => s + b[1] - b[0], 0);
+  const d0 = new Date(hojeD * 86400000);
+  definirTexto($('#progHojeData'), DIAS_LONGOS[d0.getUTCDay()] + ', ' + d0.getUTCDate() + '/' + pad(d0.getUTCMonth() + 1) + ' · agora ' + hhmm(minAgora));
+  const ligaTxt = ehValvula(i) ? 'aberta' : 'ligada';
+  let resumo;
+  if (!blocos.length) resumo = 'Hoje não ' + (ehValvula(i) ? 'abre' : 'liga') + '.';
+  else if (blocos.length <= 6) resumo = blocos.map(([a, b]) => hhmm(a) + '–' + (b === 1440 ? '24:00' : hhmm(b))).join(' · ') + ' (' + fmtDuracao(total) + ' ' + ligaTxt + ')';
+  else resumo = blocos.length + ' vezes, ' + fmtDuracao(total) + ' ' + ligaTxt + ' no total.';
+  if (!sc.en) resumo += ' Atenção: esta saída está desativada em Ajustes, então nada liga.';
+  definirTexto($('#progHojeResumo'), resumo);
+  hoje.setAttribute('aria-label', 'Hoje: ' + resumo);
+  // semana
+  const sem = $('#progSemana');
+  sem.replaceChildren();
+  for (let n = 0; n < 7; n++) {
+    const D = hojeD + n;
+    const bl = Agenda.blocosDoDia(regras, D);
+    const tot = bl.reduce((s, b) => s + b[1] - b[0], 0);
+    const barra = h('div', { class: 'barra', role: 'img', 'aria-label': DIAS_LONGOS[Agenda.diaDaSemana(D)] + ': ' + (bl.length ? bl.map(([a, b]) => hhmm(a) + ' a ' + (b === 1440 ? '24:00' : hhmm(b))).join(', ') : 'nada') });
+    barraBlocos(bl, barra);
+    if (n === 0) barra.append(h('span', { class: 'agora-marca', style: 'left:' + (minAgora / 14.4) + '%' }));
+    const dd = new Date(D * 86400000);
+    sem.append(h('span', { class: 'dia' + (n === 0 ? ' hoje' : ''), text: n === 0 ? 'Hoje' : DIAS_CURTOS[dd.getUTCDay()] + ' ' + dd.getUTCDate() }), barra,
+      h('span', { class: 'total', text: fmtDuracaoCurta(tot) }));
+  }
+  sem.append(h('span'), h('div', { class: 'regua', 'aria-hidden': 'true' }, h('span', { style: 'left:0', text: '0h' }), h('span', { class: 'r-meio', style: 'left:25%', text: '6h' }), h('span', { style: 'left:50%', text: '12h' }), h('span', { class: 'r-meio', style: 'left:75%', text: '18h' }), h('span', { style: 'left:100%', text: '24h' })), h('span'));
+  // avisos
+  const av = $('#progAvisos');
+  av.replaceChildren();
+  if (ehValvula(i)) {
+    const sob = sobreposicaoValvulas();
+    if (sob.length) {
+      av.append(h('div', { class: 'alerta alerta-aviso', role: 'status', style: 'margin-top:12px' }, icone('alerta'),
+        h('div', { class: 'alerta-corpo' }, h('h2', { text: 'As duas válvulas abrem juntas' }),
+          h('p', { text: 'A água pode não dar pressão para as duas. Exemplos: ' + sob.slice(0, 3).join(' · ') + (sob.length > 3 ? ' e mais ' + (sob.length - 3) + '.' : '.') }))));
+    }
+  }
+}
+// Varre uma semana minuto a minuto procurando as duas válvulas abertas juntas.
+function sobreposicaoValvulas() {
+  const R = E.rascunho;
+  if (!R || !R.s[0].en || !R.s[1].en || !R.s[0].r.length || !R.s[1].r.length) return [];
+  const D0 = 3; // 4/1/1970 foi domingo
+  const res = [];
+  let ini = -1;
+  for (let m = 0; m <= 7 * 1440; m++) {
+    const L = (D0 * 1440 + m) * 60;
+    const junto = m < 7 * 1440 && Agenda.programaAtivo(R.s[0].r, L) && Agenda.programaAtivo(R.s[1].r, L);
+    if (junto && ini < 0) ini = m;
+    if (!junto && ini >= 0) {
+      res.push(DIAS_CURTOS[Math.floor(ini / 1440)] + ' ' + hhmm(ini % 1440) + '–' + hhmm(m % 1440));
+      ini = -1;
+    }
+  }
+  return res;
+}
+
+function addRegra(tipo) {
+  const regras = E.rascunho.s[E.saidaProg].r;
+  if (regras.length >= 8) { aviso('Máximo de 8 regras por saída.'); return; }
+  regras.push(tipo === 'f' ? { k: 'f', h: 360, d: 10, w: 127, en: 1 } : { k: 'c', a: 360, b: 1080, on: 15, off: 15, w: 127, en: 1 });
+  alterouRascunho();
+  renderProgramas();
+  const cards = $$('#progRegras .regra');
+  if (cards.length) cards[cards.length - 1].scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+async function usarModelo() {
+  const i = E.saidaProg;
+  const sc = E.rascunho.s[i];
+  if (sc.r.length) {
+    const ok = await confirmar('Trocar as regras?', 'As ' + sc.r.length + ' regras de ' + (sc.n || NOMES_PADRAO[i]) + ' serão trocadas pelo modelo Dia 15/15 · Noite 15/45.', 'Trocar');
+    if (!ok) return;
+  }
+  sc.r = [
+    { k: 'c', a: 360, b: 1140, on: 15, off: 15, w: 127, en: 1 },
+    { k: 'c', a: 1140, b: 360, on: 15, off: 45, w: 127, en: 1 }
+  ];
+  alterouRascunho();
+  renderProgramas();
+  aviso('Modelo aplicado. Toque em Enviar para gravar.');
+}
+
+// =====================================================================
+// RASCUNHO (mudanças ainda não enviadas)
+// =====================================================================
+function temMudancas() { return !!(E.rascunho && E.cfg && canon(E.rascunho) !== canon(E.cfg)); }
+function alterouRascunho() {
+  gravar('rascunho', E.rascunho);
+  atualizarBarra();
+}
+function atualizarBarra() {
+  const tem = temMudancas();
+  const barra = $('#barraRascunho');
+  if (barra.hidden === tem) barra.hidden = !tem;
+  document.body.classList.toggle('com-barra', tem);
+  const pode = conectado() && !lig.enviandoCfg;
+  $('#btnEnviar').disabled = !pode;
+  definirTexto($('#barraSub'), lig.enviandoCfg ? 'Enviando…' : conectado() ? 'Toque em Enviar para gravar.' : 'Conecte para enviar.');
+}
+function montarCfgEnvio() {
+  const R = E.rascunho;
+  const c = {
+    v: 1, nome: R.nome, tz: num(R.tz, -180), pms: R.pms, f2: R.f2 ? 1 : 0,
+    s: R.s.map((s) => ({ n: s.n, en: s.en ? 1 : 0, inv: s.inv ? 1 : 0, r: s.r.map(regraLimpa) })),
+    sen: R.sen.map((x) => ({ n: x.n, en: x.en ? 1 : 0, tp: x.tp, mva: x.mva, div: x.div, aj: x.aj, sa: x.sa, min: x.min, max: x.max, corta: x.corta ? 1 : 0 }))
+  };
+  if (typeof R.pin === 'string') c.pin = R.pin;
+  return c;
+}
+async function enviarRascunho() {
+  if (!conectado()) { aviso('Conecte ao controlador para enviar.'); return; }
+  const c = montarCfgEnvio();
+  const tam = bytesUtf8(JSON.stringify(c));
+  if (tam > 4000) { aviso('Ficou grande demais para o controlador (' + tam + ' de 4000). Tire algumas regras ou encurte os nomes.', 'erro'); return; }
+  lig.enviandoCfg = true;
+  lig.adotarCfg = true;
+  lig.cfgEnviada = c;
+  lig.canonEnviado = canon(E.rascunho);
+  atualizarBarra();
+  try {
+    await pedir({ t: 'cfg', c: c }, 'ok');
+    if (typeof c.pin === 'string' && lig.aparelho) guardarPin(lig.aparelho.id, c.pin || null);
+    aviso('Mudanças gravadas no controlador.', 'ok');
+  } catch (e) {
+    lig.adotarCfg = false;
+    lig.cfgEnviada = null;
+    aviso('Não gravou: ' + e.message, 'erro');
+  } finally {
+    lig.enviandoCfg = false;
+    atualizarBarra();
+  }
+}
+async function descartarRascunho() {
+  const ok = await confirmar('Descartar as mudanças?', 'Volta tudo para o que está gravado no controlador.', 'Descartar', true);
+  if (!ok || !E.cfg) return;
+  E.rascunho = clonar(E.cfg);
+  delete E.rascunho.pin;
+  alterouRascunho();
+  renderAba(true);
+  aviso('Mudanças descartadas.');
+}
+
+// =====================================================================
+// HISTÓRICO
+// =====================================================================
+function fmtDif(v) {
+  const a = Math.abs(v), s = v < 0 ? '−' : '+';
+  if (a < 120) return s + a + ' s';
+  if (a < 7200) return s + Math.round(a / 60) + ' min';
+  if (a < 172800) return s + Math.round(a / 3600) + ' h';
+  return s + Math.round(a / 86400) + ' dias';
+}
+function fraseEvento(e) {
+  const s = e[1], c = e[2], o = e[3], v = e[4];
+  const nome = s >= 0 && s <= 3 ? nomeSaida(s) : '';
+  const origem = ORIGENS[o] !== undefined ? ' (' + ORIGENS[o] + ')' : '';
+  const valv = ehValvula(s);
+  switch (c) {
+    case 1: return nome + (valv ? ' abriu' : ' ligou') + origem + (v > 0 ? ' · pulso ' + fmtA(v) : '');
+    case 2: return nome + (valv ? ' fechou' : ' desligou') + origem + (v > 0 ? ' · pulso ' + fmtA(v) : '');
+    case 10: return 'Controlador ligou';
+    case 11: return 'Hora acertada pelo app' + (v ? ' (' + fmtDif(v) + ')' : '');
+    case 12: return 'Configuração gravada';
+    case 13: return (s < 0 ? 'Tudo pausado' : nome + ' pausada') + ' por ' + Math.round(v) + ' h' + (o === 5 ? ' pelo botão do controlador' : '');
+    case 14: return (s < 0 ? 'Pausas canceladas' : nome + ': pausa cancelada') + (o === 5 ? ' pelo botão do controlador' : '');
+    case 20: return 'Alarme: ' + nome + ' com pulso sem corrente (' + fmtA(v) + ')';
+    case 21: return 'Alarme: ' + nome + (valv ? ' aberta' : ' ligada') + ' sem corrente (' + fmtA(v) + ')';
+    case 22: return 'Alarme: ' + nome + ' com corrente alta (' + fmtA(v) + ')';
+    case 23: return 'Alarme: ' + nome + ' bloqueada por corrente alta (' + fmtA(v) + ')';
+    case 24: return nome + ' liberada (bloqueio retirado)';
+    case 30: return 'Sensores zerados';
+    default: return 'Evento ' + c + (nome ? ' · ' + nome : '');
+  }
+}
+function iconeEvento(e) {
+  const c = e[2];
+  if (c >= 20 && c <= 23) return 'alerta';
+  if (c === 1) return ehValvula(e[1]) ? 'gota' : 'energia';
+  if (c === 2) return ehValvula(e[1]) ? 'gotaFechada' : 'energia';
+  if (c === 13 || c === 14) return 'pausa';
+  if (c === 11) return 'relogio';
+  if (c === 24) return 'cadeado';
+  if (c === 30) return 'pulso';
+  return 'info';
+}
+function renderHistorico() {
+  const filtros = $('#histFiltros');
+  const R = E.cfg || E.rascunho;
+  const opcoes = [['tudo', 'Tudo']].concat([0, 1, 2, 3].map((i) => ['s' + i, nomeSaida(i, R)]), [['alarmes', 'Alarmes']]);
+  filtros.replaceChildren(...opcoes.map(([id, rot]) => h('button', { type: 'button', 'aria-pressed': E.filtroHist === id ? 'true' : 'false', onclick: () => { E.filtroHist = id; E.histLimite = 150; renderHistorico(); } },
+    id === 'alarmes' ? icone('alerta') : null, rot)));
+  let lista = E.eventos.slice();
+  if (E.filtroHist === 'alarmes') lista = lista.filter((e) => e[2] >= 20 && e[2] <= 23);
+  else if (E.filtroHist[0] === 's') { const s = Number(E.filtroHist.slice(1)); lista = lista.filter((e) => e[1] === s); }
+  lista.reverse(); // mais novo primeiro (os sem hora ficam no fim do vetor → aparecem primeiro: são do boot atual)
+  const caixa = $('#histLista');
+  caixa.replaceChildren();
+  if (!lista.length) {
+    caixa.append(h('div', { class: 'cartao vazio' }, icone('relogio'), h('h2', { text: E.eventos.length ? 'Nada com esse filtro' : 'Sem eventos ainda' }),
+      h('p', { text: E.eventos.length ? 'Escolha outro filtro acima.' : 'Conecte ao controlador e toque em Atualizar.' })));
+    $('#histMaisCx').hidden = true;
+    return;
+  }
+  const hojeD = diaDe(agoraEp());
+  let diaAtual = null, ul = null;
+  lista.slice(0, E.histLimite).forEach((e) => {
+    const D = e[0] > 0 ? diaDe(e[0]) : 'semhora';
+    if (D !== diaAtual) {
+      diaAtual = D;
+      caixa.append(h('h2', { class: 'hist-dia', text: D === 'semhora' ? 'Sem hora (antes de acertar o relógio)' : nomeDia(D, hojeD) }));
+      ul = h('ul', { class: 'hist-lista' });
+      caixa.append(ul);
+    }
+    const alarme = e[2] >= 20 && e[2] <= 23;
+    ul.append(h('li', { class: alarme ? 'alarme' : null }, h('span', { class: 'hora', text: e[0] > 0 ? hhmmEp(e[0]) : '--:--' }), icone(iconeEvento(e)), h('span', { class: 'txt', text: fraseEvento(e) })));
+  });
+  $('#histMaisCx').hidden = lista.length <= E.histLimite;
+}
+
+// =====================================================================
+// AJUSTES
+// =====================================================================
+function modeloDe(x) {
+  const m = MODELOS.find((m) => m.mva !== undefined && m.tp === x.tp && Math.abs(m.mva - x.mva) < 0.01 && Math.abs(m.div - x.div) < 0.001);
+  return m ? m.id : 'pers';
+}
+function campoTexto(rotulo, valor, maxBytes, aoMudar, ajuda, obrigatorio) {
+  const id = novoId('txt');
+  const dica = h('p', { class: 'dica', id: id + 'd', role: 'status', text: ajuda || '', hidden: !ajuda });
+  const ent = h('input', { id: id, class: 'entrada', type: 'text', value: valor, autocomplete: 'off', spellcheck: 'false', 'aria-describedby': id + 'd' });
+  ent.addEventListener('input', () => {
+    const b = bytesUtf8(ent.value.trim());
+    if (b > maxBytes) { ent.setAttribute('aria-invalid', 'true'); dica.textContent = 'Muito longo: ' + b + ' de ' + maxBytes + ' (acentos contam 2).'; dica.dataset.tipo = 'erro'; dica.hidden = false; }
+    else { ent.removeAttribute('aria-invalid'); dica.textContent = ajuda || ''; dica.dataset.tipo = ''; dica.hidden = !ajuda; }
+  });
+  ent.addEventListener('change', () => {
+    let v = ent.value.trim();
+    let txt = ajuda || '', tipo = '';
+    if (bytesUtf8(v) > maxBytes) { v = cortarBytes(v, maxBytes); txt = 'Cortado para caber (' + maxBytes + ' no máximo).'; tipo = 'aviso'; }
+    if (obrigatorio && !v) { v = valor; txt = 'O nome não pode ficar vazio.'; tipo = 'aviso'; }
+    ent.value = v;
+    ent.removeAttribute('aria-invalid');
+    dica.textContent = txt; dica.dataset.tipo = tipo; dica.hidden = !txt;
+    valor = v;
+    aoMudar(v);
+  });
+  return h('label', { class: 'campo', for: id }, h('span', { text: rotulo }), ent, dica);
+}
+function campoSelecao(rotulo, opcoes, valor, aoMudar, ajuda) {
+  const id = novoId('sel');
+  const sel = h('select', { id: id, class: 'entrada' }, opcoes.map(([v, t]) => h('option', { value: String(v), text: t })));
+  sel.value = String(valor);
+  sel.addEventListener('change', () => aoMudar(sel.value));
+  return h('label', { class: 'campo', for: id }, h('span', { text: rotulo }), sel, ajuda ? h('p', { class: 'dica', text: ajuda }) : null);
+}
+function segmentado(rotulo, opcoes, valor, aoMudar) {
+  const grupo = h('div', { class: 'segmentado', role: 'group', 'aria-label': rotulo });
+  opcoes.forEach(([v, t]) => {
+    const b = h('button', { type: 'button', 'aria-pressed': v === valor ? 'true' : 'false', text: t });
+    b.addEventListener('click', () => {
+      $$('button', grupo).forEach((x) => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      aoMudar(v);
+    });
+    grupo.append(b);
+  });
+  return h('div', { class: 'campo' }, h('span', { class: 'campo-rot', text: rotulo }), grupo);
+}
+
+function renderAjustes() {
+  const corpo = $('#ajCorpo');
+  corpo.replaceChildren();
+  if (!E.rascunho) { corpo.append(vazioSemCfg('Conecte uma vez para carregar os ajustes do controlador.')); return; }
+  const R = E.rascunho;
+  // controlador
+  const pinTxt = typeof R.pin === 'string' ? (R.pin ? 'PIN novo será gravado ao enviar.' : 'O PIN será tirado ao enviar.') : (E.cfg && E.cfg.temPin ? 'Este controlador tem PIN.' : 'Sem PIN: qualquer celular perto pode conectar.');
+  const pinId = novoId('pin');
+  const pinEnt = h('input', { id: pinId, class: 'entrada mono', type: 'password', inputmode: 'numeric', autocomplete: 'new-password', maxlength: '8', placeholder: 'até 8 números' });
+  const pinDica = h('p', { class: 'dica', role: 'status', text: pinTxt });
+  const pinBtns = h('div', { class: 'acoes' },
+    h('button', { type: 'button', class: 'btn', onclick: () => {
+      const v = pinEnt.value.trim();
+      if (!/^\d{1,8}$/.test(v)) { pinDica.textContent = 'O PIN tem de 1 a 8 números.'; pinDica.dataset.tipo = 'erro'; return; }
+      R.pin = v; pinEnt.value = ''; alterouRascunho(); renderAjustes();
+    } }, 'Trocar PIN'),
+    h('button', { type: 'button', class: 'btn', disabled: !(E.cfg && E.cfg.temPin) && typeof R.pin !== 'string', onclick: () => {
+      if (typeof R.pin === 'string' && !(E.cfg && E.cfg.temPin)) delete R.pin; else R.pin = '';
+      alterouRascunho(); renderAjustes();
+    } }, typeof R.pin === 'string' && !(E.cfg && E.cfg.temPin) ? 'Desfazer' : 'Tirar PIN'));
+  corpo.append(h('div', { class: 'cartao' }, h('h2', { text: 'Controlador' }),
+    campoTexto('Nome do controlador', R.nome, 20, (v) => { R.nome = v; alterouRascunho(); }, 'Aparece na lista do Bluetooth. Até 20 letras.', true),
+    h('div', { class: 'sub-cartao' },
+      h('label', { class: 'campo', for: pinId }, h('span', { text: 'PIN (senha para conectar)' }), pinEnt), pinDica, pinBtns),
+    h('div', { class: 'sub-cartao' },
+      campoInteiro('Pulso da válvula', R, 'pms', 'ms', () => alterouRascunho(), 'Tempo do pulso que abre ou fecha a válvula. Padrão: 80 ms.'),
+      interruptor('Fechar duas vezes', 'Manda um 2º pulso de fechar 2 s depois, para garantir.', !!R.f2, (v) => { R.f2 = v ? 1 : 0; alterouRascunho(); })),
+    h('div', { class: 'sub-cartao' }, campoFuso(R))));
+  // saídas
+  corpo.append(h('h2', { class: 'secao', text: 'Saídas' }));
+  R.s.forEach((s, i) => {
+    const valv = ehValvula(i);
+    corpo.append(h('div', { class: 'cartao' },
+      h('div', { class: 'cartao-cab' }, h('h2', { text: (valv ? 'Válvula ' + (i + 1) : 'Relé ' + (i - 1)) }), h('span', { class: 'mudo pequeno', text: valv ? 'ponte H · GPIO ' + (i ? '27/33' : '25/26') : 'GPIO ' + (i === 2 ? 16 : 17) })),
+      campoTexto('Nome', s.n, 24, (v) => { s.n = v; alterouRascunho(); }, null, true),
+      interruptor('Ativa', 'Desativada = nunca liga (nem pelo programa, nem à mão).', !!s.en, (v) => { s.en = v ? 1 : 0; alterouRascunho(); }),
+      interruptor('Inverter', valv ? 'Troca a polaridade: use se a válvula abre quando devia fechar.' : 'Ligue se o relé nunca liga: é para módulo que aciona em nível baixo (LOW). Desligado, o pino fica solto e o relé não liga sozinho.', !!s.inv, (v) => { s.inv = v ? 1 : 0; alterouRascunho(); })));
+  });
+  // sensores
+  corpo.append(h('h2', { class: 'secao', text: 'Sensores de corrente' }));
+  R.sen.forEach((x, j) => corpo.append(cartaoSensor(j)));
+}
+
+// Fuso do controlador (§12: os programas seguem o fuso do controlador, não o do celular)
+const FUSOS = [[-180, 'Brasília (UTC−3)'], [-240, 'Manaus, Cuiabá, Campo Grande (UTC−4)'], [-300, 'Acre (UTC−5)'], [-120, 'Fernando de Noronha (UTC−2)']];
+function campoFuso(R) {
+  const tz = num(R.tz, -180), cel = fusoCelular();
+  const ops = FUSOS.slice();
+  if (!ops.some((o) => o[0] === tz)) ops.push([tz, fmtFuso(tz)]);
+  if (!ops.some((o) => o[0] === cel)) ops.push([cel, fmtFuso(cel) + ' (deste celular)']);
+  const campo = campoSelecao('Fuso horário do controlador', ops, tz, (v) => { R.tz = Number(v); alterouRascunho(); renderAjustes(); },
+    'Os horários dos programas valem neste fuso. A hora é acertada pelo celular toda vez que conecta.');
+  const aviso = cel === tz ? null : h('p', { class: 'dica', dataset: { tipo: 'aviso' }, text: 'Este celular está em ' + fmtFuso(cel) + ' e o controlador em ' + fmtFuso(tz) + '. Se o controlador fica aqui, escolha o fuso daqui e toque em Enviar.' });
+  return h('div', null, campo, aviso);
+}
+
+function cartaoSensor(j) {
+  const x = E.rascunho.sen[j];
+  const card = h('div', { class: 'cartao sensor-aj', dataset: { j: j } });
+  const refazer = () => { const novo = cartaoSensor(j); card.replaceWith(novo); };
+  const mudou = () => alterouRascunho();
+  card.append(h('div', { class: 'cartao-cab' }, h('h2', { text: 'Sensor ' + (j + 1) }), h('span', { class: 'mudo pequeno', text: 'GPIO ' + (j ? 35 : 34) })),
+    interruptor('Sensor ativo', null, !!x.en, (v) => { x.en = v ? 1 : 0; mudou(); refazer(); }));
+  if (!x.en) {
+    card.append(h('p', { class: 'dica', text: 'Desligado: o controlador não lê este sensor.' }));
+    return card;
+  }
+  const opSa = [[-1, 'Nada (só mostra)'], [-2, 'Pulso das válvulas'], [2, nomeSaida(2, E.rascunho)], [3, nomeSaida(3, E.rascunho)]];
+  if (x.sa === 0 || x.sa === 1) opSa.push([x.sa, nomeSaida(x.sa, E.rascunho)]);
+  card.append(
+    campoTexto('Nome', x.n || '', 24, (v) => { x.n = v; mudou(); }, null, false),
+    campoSelecao('Modelo', MODELOS.map((m) => [m.id, m.nome]), modeloDe(x), (id) => {
+      const m = MODELOS.find((q) => q.id === id);
+      if (m && m.mva !== undefined) { x.mva = m.mva; x.tp = m.tp; x.div = m.div; mudou(); refazer(); }
+    }),
+    segmentado('Tipo', [['dc', 'DC (ACS712)'], ['ac', 'AC (SCT-013)']], x.tp, (v) => { x.tp = v; mudou(); refazer(); }),
+    h('div', { class: 'grade-2' },
+      campoNumero('mV por A', x, 'mva', 'mV/A', 1, () => { mudou(); refazer(); }),
+      campoNumero('Divisor', x, 'div', null, 3, () => { mudou(); refazer(); })),
+    h('p', { class: 'dica', text: 'Divisor: sem divisor = 1. Com 10 k em cima e 20 k embaixo = 0,667.' }),
+    campoNumero('Ajuste fino', x, 'aj', '×', 3, mudou, '1 = sem ajuste. Se o app mostra 2,0 A e o alicate mede 2,2 A, use 1,1.'),
+    campoSelecao('O que mede', opSa, x.sa, (v) => { x.sa = Number(v); mudou(); refazer(); }));
+  if (x.sa === -2) {
+    card.append(campoNumero('Mínimo', x, 'min', 'A', 2, mudou, 'Pulso abaixo disso = alarme “pulso sem corrente”. 0 = sem alarme.'));
+  } else if (x.sa >= 0) {
+    card.append(h('div', { class: 'grade-2' },
+      campoNumero('Mínimo', x, 'min', 'A', 2, mudou),
+      campoNumero('Máximo', x, 'max', 'A', 2, () => { mudou(); refazer(); })),
+    h('p', { class: 'dica', text: 'Ligada e abaixo do mínimo = alarme (ex.: bomba sem água). Acima do máximo = alarme. 0 = sem limite.' }),
+    interruptor('Cortar se passar', 'Desliga e bloqueia a saída se passar do máximo.', !!x.corta, (v) => { x.corta = v ? 1 : 0; mudou(); }, !(x.max > 0)));
+  }
+  return card;
+}
+
+async function acaoReiniciar(botao) {
+  if (!conectado()) { aviso('Conecte ao controlador primeiro.'); return; }
+  const ok = await confirmar('Reiniciar o controlador?', 'As válvulas fecham e o manual é cancelado. O app conecta de novo sozinho.', 'Reiniciar');
+  if (!ok) return;
+  if (await comando({ t: 'reiniciar' }, 'Reiniciando… o app reconecta sozinho.', botao)) {
+    lig.tentativas = 0;
+  }
+  botao.disabled = false;
+}
+async function acaoEsquecer() {
+  const ok = await confirmar('Esquecer o controlador?', 'Este celular deixa de conectar sozinho. Os programas e o histórico guardados no app continuam.', 'Esquecer', true);
+  if (!ok) return;
+  let ap = lig.aparelho;
+  const lembrado = ler('dispositivo', null);
+  if (!ap && lembrado && lembrado.id && navigator.bluetooth && typeof navigator.bluetooth.getDevices === 'function') {
+    // não conectou nesta vez: acha o aparelho com permissão para poder esquecer
+    try { ap = (await navigator.bluetooth.getDevices()).find((d) => d.id === lembrado.id) || null; } catch (e) { ap = null; }
+  }
+  desconectar(true);
+  if (lembrado && lembrado.id) guardarPin(lembrado.id, null);
+  if (ap) {
+    guardarPin(ap.id, null);
+    if (typeof ap.forget === 'function') { try { await ap.forget(); } catch (e) { /* nada */ } }
+  }
+  gravar('dispositivo', null);
+  lig.aparelho = null;
+  aviso('Controlador esquecido.');
+}
+
+// =====================================================================
+// Navegação e ciclo de atualização
+// =====================================================================
+function mostrarAba(nome) {
+  if (!['painel', 'corrente', 'programas', 'historico', 'ajustes'].includes(nome)) nome = 'painel';
+  const trocou = E.aba !== nome;
+  E.aba = nome;
+  gravar('aba', nome);
+  $$('.aba').forEach((s) => { s.hidden = s.id !== 'aba-' + nome; });
+  $$('.nav button').forEach((b) => { if (b.dataset.aba === nome) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  renderAba(true);
+  if (trocou) window.scrollTo(0, 0);
+}
+function renderAba(forcar) {
+  switch (E.aba) {
+    case 'painel': montarCartoes(); renderAlarmes(); break;
+    case 'corrente': renderCorrente(); break;
+    case 'programas': renderProgramas(); break;
+    case 'historico': renderHistorico(); break;
+    case 'ajustes': if (forcar) renderAjustes(); break;
+  }
+}
+let chaveCartoes = '';
+function atualizarTudo() {
+  // refaz os cartões do painel só se nomes/ativas mudaram
+  const chave = E.cfg ? JSON.stringify(E.cfg.s.map((s) => [s.n, s.en])) + JSON.stringify(E.cfg.sen.map((x) => [x.en, x.sa])) : '';
+  if (chave !== chaveCartoes) {
+    chaveCartoes = chave;
+    if (E.aba === 'painel') montarCartoes();
+    if (E.aba === 'corrente') renderCorrente();
+  }
+  atualizarPainel();
+  if (E.aba === 'corrente') { pedirDesenho(); atualizarPicos(); }
+}
+
+function mostrarSemBt() {
+  $('#avisoSemBt').hidden = false;
+  definirEstado('sembt');
+  aviso('Este navegador não tem Bluetooth para sites. Abra no Chrome do Android.', 'erro');
+}
+
+// relógio de 1 s da tela
+setInterval(() => {
+  if (lig.estado === 'conectado' && performance.now() - lig.ultimoSt > SEM_SINAL_MS) definirEstado('semsinal');
+  if (document.visibilityState !== 'visible') return;
+  if (E.aba === 'painel') atualizarPainel(); else atualizarConexao();
+  if (E.aba === 'corrente') pedirDesenho();
+}, 1000);
+// minuto a minuto: linha do "agora" nos programas
+setInterval(() => { if (E.aba === 'programas' && document.visibilityState === 'visible') atualizarVisoesProg(); }, 30000);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (lig.querLigado && lig.aparelho && !conectado() && lig.estado !== 'conectando' && lig.estado !== 'pin' && !lig.timerReconexao && !lig.abortarBusca) {
+    lig.tentativas = 0;
+    agendarReconexao(true);
+  }
+  renderAba(false);
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => pedirDesenho());
+window.addEventListener('resize', () => { if (E.aba === 'corrente') pedirDesenho(); });
+
+// cliques
+document.addEventListener('click', (e) => {
+  const nav = e.target.closest('.nav button[data-aba]');
+  if (nav) { mostrarAba(nav.dataset.aba); return; }
+  const b = e.target.closest('button[data-acao]');
+  if (b && !b.disabled) {
+    const i = Number(b.dataset.i);
+    const acoes = { ligar: acaoLigar, desligar: acaoDesligar, programa: acaoPrograma, liberar: acaoLiberar, pausar: acaoPausar, cancelarPausa: acaoCancelarPausa };
+    if (acoes[b.dataset.acao]) acoes[b.dataset.acao](i, b);
+  }
+});
+$('#btnConectar').addEventListener('click', botaoConectar);
+$('#btnDesconectar').addEventListener('click', () => desconectar(false));
+$('#btnChuva').addEventListener('click', (e) => acaoChuva(e.currentTarget));
+$('#btnZerar').addEventListener('click', (e) => acaoZerar(e.currentTarget));
+$('#btnAddFixo').addEventListener('click', () => addRegra('f'));
+$('#btnAddCiclo').addEventListener('click', () => addRegra('c'));
+$('#btnModelo').addEventListener('click', usarModelo);
+$('#btnAtualizarLog').addEventListener('click', () => pedirLog(true));
+$('#btnHistMais').addEventListener('click', () => { E.histLimite += 300; renderHistorico(); });
+$('#btnEnviar').addEventListener('click', enviarRascunho);
+$('#btnDescartar').addEventListener('click', descartarRascunho);
+$('#btnReiniciar').addEventListener('click', (e) => acaoReiniciar(e.currentTarget));
+$('#btnEsquecer').addEventListener('click', acaoEsquecer);
+$('#versaoApp').textContent = VERSAO_APP;
+// a folga no fim da página e os avisos rápidos acompanham a altura da barra de mudanças
+if (typeof ResizeObserver === 'function') {
+  new ResizeObserver(() => {
+    const b = $('#barraRascunho');
+    if (!b.hidden && b.offsetHeight) document.documentElement.style.setProperty('--barra-alt', b.offsetHeight + 'px');
+  }).observe($('#barraRascunho'));
+}
+
+// =====================================================================
+// Service worker (funciona sem internet) e aviso de versão nova
+// =====================================================================
+(function registrarSw() {
+  if (!('serviceWorker' in navigator)) return;
+  const tinhaControle = !!navigator.serviceWorker.controller;
+  let pediuAtualizar = false;
+  const mostrar = (sw) => {
+    const caixa = $('#versaoNova');
+    caixa.hidden = false;
+    $('#btnAtualizarApp').onclick = () => {
+      pediuAtualizar = true;
+      if (sw) sw.postMessage({ tipo: 'atualizar' }); else location.reload();
+    };
+  };
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!tinhaControle) return; // primeira instalação: nada a fazer
+    if (pediuAtualizar) location.reload(); else mostrar(null);
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then((reg) => {
+      if (reg.waiting && tinhaControle) mostrar(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const novo = reg.installing;
+        if (!novo) return;
+        novo.addEventListener('statechange', () => {
+          if (novo.state === 'installed' && navigator.serviceWorker.controller) mostrar(novo);
+        });
+      });
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+    }).catch(() => { /* sem service worker: o app funciona igual, só não abre sem internet */ });
+  });
+})();
+
+// =====================================================================
+// Início
+// =====================================================================
+mostrarAba(ler('aba', 'painel'));
+renderAlarmes();
+if (!navigator.bluetooth) {
+  $('#avisoSemBt').hidden = false;
+  definirEstado('sembt');
+} else {
+  definirEstado('desligado');
+  reconectarAoAbrir();
+}
+// para os testes e para depuração
+window.__rega = { E: E, lig: lig, versao: VERSAO_APP, juntarEventos: juntarEventos };
+})();
+</script>
+</body>
+</html>

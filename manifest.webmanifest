@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "Irriga Horta",
+  "short_name": "Irriga",
+  "description": "Irriga Horta: programa e acompanha a rega e a hidroponia pelo Bluetooth do celular.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ecf1f3",
+  "theme_color": "#0b5d73",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

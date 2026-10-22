@@ -1,0 +1,6 @@
+# saída dos testes do app (capturas de tela, fontes baixadas)
+testes/.saida/
+
+# teste nativo do firmware (programa compilado e ArduinoJson baixado)
+testes/nativo/rega
+testes/nativo/.ArduinoJson/
